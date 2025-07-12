@@ -447,7 +447,7 @@
                 form.style.display = 'none';
                 loadingScreen.style.display = 'flex';
                 // !!! ЗАМЕНИ URL на свой адрес от ngrok !!!
-                const backendUrl = `https://your-ngrok-url.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
+                const backendUrl = `https://fedb65099ec7.ngrok-free.app/${tg.initDataUnsafe.user.id}`;
                 try {
                     const response = await fetch(backendUrl);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
