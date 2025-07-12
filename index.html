@@ -377,6 +377,13 @@
             tg.expand();
         }
 
+        // --- Элементы интерфейса ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const loadingScreen = document.getElementById('loading-screen'); // Убедись, что этот div есть в HTML
+        const form = document.getElementById('onboarding-form');
+        const startButton = document.getElementById('start-button');
+        const submitButton = document.getElementById('submit-button');
+
         // --- Логика для условного отображения полей ---
         const setupConditionalDisplay = (triggerSelector, targetId) => {
             const trigger = document.querySelector(triggerSelector);
@@ -387,7 +394,6 @@
                 });
             }
         };
-
         const setupRadioDisplay = (radioName, targetId, showValue) => {
             const target = document.getElementById(targetId);
             document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
@@ -398,7 +404,6 @@
                 });
             });
         };
-
         const setupSelectDisplay = (selectId, targetId, showValue) => {
             const select = document.getElementById(selectId);
             const target = document.getElementById(targetId);
@@ -410,9 +415,13 @@
         }
 
         // --- Инициализация всех интерактивных элементов ---
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const form = document.getElementById('onboarding-form');
-        const startButton = document.getElementById('start-button');
+        setupSelectDisplay('pace_5k', 'pace_5k_specific_group', 'specific_time');
+        setupConditionalDisplay('input[name="goals"][value="weight_loss"]', 'target_weight_group');
+        setupRadioDisplay('race_goal_exists', 'race_details_group', 'yes');
+        setupConditionalDisplay('input[name="food_preferences"][value="allergy"]', 'food_allergies_group');
+        setupConditionalDisplay('input[name="equipment"][value="other"]', 'equipment_other_group');
+
+        // --- Логика для кнопки "Начать" ---
         if (startButton) {
             startButton.addEventListener('click', () => {
                 welcomeScreen.style.display = 'none';
@@ -420,23 +429,15 @@
             });
         }
         
-        setupSelectDisplay('pace_5k', 'pace_5k_specific_group', 'specific_time');
-        setupConditionalDisplay('input[name="goals"][value="weight_loss"]', 'target_weight_group');
-        setupRadioDisplay('race_goal_exists', 'race_details_group', 'yes');
-        setupConditionalDisplay('input[name="food_preferences"][value="allergy"]', 'food_allergies_group');
-        setupConditionalDisplay('input[name="equipment"][value="other"]', 'equipment_other_group');
-
         // --- Логика для главной кнопки отправки ---
-        const submitButton = document.getElementById('submit-button');
         if (submitButton) {
             submitButton.addEventListener('click', () => {
                 const data = {};
-
                 const getValue = (id) => document.getElementById(id)?.value || null;
                 const getMultiSelect = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
                 const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || null;
 
-                // Сбор данных из всех полей
+                // --- Весь твой работающий код сбора данных ---
                 data.name = getValue('name');
                 data.age_range = getValue('age_range');
                 data.gender = getValue('gender');
@@ -444,19 +445,16 @@
                 data.weight = getValue('weight');
                 data.city = getValue('city');
                 data.experience = getValue('experience');
-                
                 let pace_5k_value = getValue('pace_5k');
                 if (pace_5k_value === 'specific_time') {
                     data.pace_5k = getValue('pace_5k_specific');
                 } else {
                     data.pace_5k = pace_5k_value;
                 }
-
                 data.goals = getMultiSelect('goals');
                 if (data.goals.includes('weight_loss')) {
                     data.target_weight = getValue('target_weight');
                 }
-
                 const raceGoal = getRadio('race_goal_exists');
                 data.race_goal_exists = raceGoal === 'yes';
                 if (data.race_goal_exists) {
@@ -464,20 +462,17 @@
                     data.race_distance = getValue('race_distance');
                     data.race_time_goal = getValue('race_time_goal');
                 }
-
                 data.training_days_per_week = getValue('training_days_per_week');
                 data.weekly_volume_km = getValue('weekly_volume_km');
                 data.preferred_time = getMultiSelect('preferred_time');
                 data.preferred_terrain = getMultiSelect('preferred_terrain');
                 data.favorite_workouts = getMultiSelect('favorite_workouts');
-
                 data.food_preferences = getMultiSelect('food_preferences');
                 if (data.food_preferences.includes('allergy')) {
                     data.food_allergies = getValue('food_allergies');
                 }
                 data.meals_per_day = getValue('meals_per_day');
                 data.drinks_coffee = getRadio('drinks_coffee') === 'yes';
-
                 data.equipment = getMultiSelect('equipment');
                 if (data.equipment.includes('other')) {
                     data.equipment_other = getValue('equipment_other');
@@ -485,13 +480,41 @@
                 data.supplements_info = getValue('supplements_info');
                 data.additional_info = getValue('additional_info');
                 data.plan_start_date = getRadio('plan_start_date');
+                // --- Конец кода сбора данных ---
 
-                // Отправляем данные в Telegram бот и закрываем приложение
                 if (tg) {
                     tg.sendData(JSON.stringify(data));
                     tg.close();
                 }
             });
+        }
+
+        // --- Логика, определяющая, что показать при запуске ---
+        function populateForm(data) {
+            console.log("Получены данные для заполнения:", data);
+        }
+        async function fetchUserProfile() {
+            welcomeScreen.style.display = 'none';
+            form.style.display = 'none';
+            loadingScreen.style.display = 'flex';
+
+            const backendUrl = `https://your-backend-service.com/get_profile?user_id=${tg.initDataUnsafe.user.id}`;
+            try {
+                console.log(`Имитация запроса на ${backendUrl}`);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                loadingScreen.style.display = 'none';
+                form.style.display = 'block';
+            } catch (error) {
+                console.error("Ошибка при загрузке профиля:", error);
+                loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте позже.</h1>';
+            }
+        }
+
+        const startParam = tg.initDataUnsafe.start_param;
+        if (startParam === 'edit_profile') {
+            fetchUserProfile(); 
+        } else {
+            welcomeScreen.style.display = 'flex';
         }
     });
 </script>
