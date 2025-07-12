@@ -6,7 +6,6 @@
     <title>Онбординг</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* --- Стили --- */
         :root {
             --bg-color: #5e17eb;
             --text-color: #ffffff;
@@ -26,15 +25,15 @@
             flex-direction: column;
             align-items: center;
         }
-        #welcome-screen {
-            display: flex;
+        #welcome-screen, #loading-screen {
+            display: none; /* JS решает, что показать */
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: calc(100vh - 40px);
             text-align: center;
         }
-        #welcome-screen h1 {
+        #welcome-screen h1, #loading-screen h1 {
             font-size: 24px;
             margin-bottom: 30px;
         }
@@ -77,7 +76,8 @@
             font-weight: 500;
         }
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -86,6 +86,11 @@
             color: var(--text-color);
             font-size: 16px;
             box-sizing: border-box;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: none;
+            height: 110px;
         }
         .form-group select {
             appearance: none;
@@ -115,20 +120,8 @@
              background-color: var(--button-accent-bg);
              color: var(--text-color);
         }
-        .form-group textarea {
-            resize: none; /* Убираем возможность менять размер */
-            height: 110px; /* Задаем фиксированную высоту в 3 строки */
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--button-choice-bg);
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-            .submit-container {
-            margin-top: 5px;
+        .submit-container {
+            margin-top: 30px;
             text-align: right;
         }
     </style>
@@ -139,13 +132,17 @@
         <h1>Персонализированные тренировки на основе твоих данных</h1>
         <button id="start-button" class="accent-button">Начать</button>
     </div>
+    
+    <div id="loading-screen">
+        <h1>Загружаем ваш профиль...</h1>
+    </div>
 
-<form id="onboarding-form">
+    <form id="onboarding-form">
         <div class="form-section">
-            <h2>О тебе 😎</h2>
+            <h2>1. О тебе</h2>
             <div class="form-group">
                 <label for="name">Как тебя зовут?</label>
-                <input type="text" id="name" name="name" placeholder="Имя">
+                <input type="text" id="name" name="name" placeholder="Алексей">
             </div>
             <div class="form-group">
                 <label for="age_range">Твой возраст?</label>
@@ -169,7 +166,7 @@
             </div>
             <div class="form-group">
                 <label for="height">Рост (см)</label>
-                <input type="number" id="height" name="height" placeholder="175">
+                <input type="number" id="height" name="height" placeholder="180">
             </div>
             <div class="form-group">
                 <label for="weight">Вес (кг)</label>
@@ -177,12 +174,12 @@
             </div>
              <div class="form-group">
                 <label for="city">Город (для прогноза погоды)</label>
-                <input type="text" id="city" name="city" placeholder="Екатеринбург">
+                <input type="text" id="city" name="city" placeholder="Висбаден">
             </div>
         </div>
         
         <div class="form-section">
-            <h2>Твой беговой опыт 🏃‍♂️</h2>
+            <h2>2. Твой беговой опыт</h2>
             <div class="form-group">
                 <label for="experience">Как давно ты бегаешь?</label>
                 <select id="experience" name="experience">
@@ -208,7 +205,7 @@
         </div>
 
         <div class="form-section">
-            <h2>Твои цели в беге 🎯</h2>
+            <h2>3. Твои цели в беге</h2>
             <div class="form-group">
                 <label>Поделись своими целями (можно выбрать несколько)</label>
                 <div class="checkbox-group">
@@ -247,7 +244,7 @@
         </div>
 
         <div class="form-section">
-            <h2>Твои предпочтения ⭐</h2>
+            <h2>4. Твои предпочтения</h2>
             <div class="form-group">
                 <label for="training_days_per_week">Сколько дней в неделю готов тренироваться?</label>
                 <select id="training_days_per_week" name="training_days_per_week">
@@ -293,7 +290,7 @@
         </div>
 
         <div class="form-section">
-            <h2>О питании 🥗</h2>
+            <h2>5. О питании</h2>
             <div class="form-group">
                 <label>Есть ли у тебя пищевые ограничения? (можно несколько)</label>
                 <div class="checkbox-group">
@@ -326,7 +323,7 @@
         </div>
         
         <div class="form-section">
-            <h2>Прочее 📦</h2>
+            <h2>6. Прочее</h2>
             <div class="form-group">
                 <label>Какое у тебя есть оборудование? (можно несколько)</label>
                 <div class="checkbox-group">
@@ -364,206 +361,194 @@
         </div>
         
         <div class="submit-container">
-             <button type="button" id="submit-button" class="accent-button">Создать мой план!</button>
+             <button type="button" id="submit-button" class="accent-button">Готово! Создать мой план</button>
         </div>
     </form>
-</body>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tg = window.Telegram.WebApp;
+            if (tg) { tg.expand(); }
 
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const loadingScreen = document.getElementById('loading-screen');
+            const form = document.getElementById('onboarding-form');
+            const startButton = document.getElementById('start-button');
+            const submitButton = document.getElementById('submit-button');
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.expand();
-        }
-
-        // --- Элементы интерфейса ---
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const loadingScreen = document.getElementById('loading-screen');
-        const form = document.getElementById('onboarding-form');
-        const startButton = document.getElementById('start-button');
-        const submitButton = document.getElementById('submit-button');
-
-
-        // --- НОВЫЙ БЛОК: Функция для ЗАПОЛНЕНИЯ формы данными ---
-        function populateForm(data) {
-            if (!data || !data.profile) {
-                console.error("Некорректные данные профиля получены.");
-                loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
-                return;
+            function populateForm(data) {
+                if (!data || !data.profile) {
+                    console.error("Некорректные данные профиля получены.");
+                    loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
+                    return;
+                }
+                const profile = data.profile;
+                const prefs = data.preferences || {};
+                const setValue = (id, value) => { const el = document.getElementById(id); if (el && value !== null && value !== undefined) el.value = value; };
+                const setMultiSelect = (name, values) => {
+                    if (values && Array.isArray(values)) {
+                        values.forEach(value => {
+                            const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                            if (cb) { cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+                        });
+                    }
+                };
+                const setRadio = (name, value) => {
+                    if (value !== null && value !== undefined) {
+                        let strValue = String(value);
+                        if (typeof value === 'boolean') strValue = value ? 'yes' : 'no';
+                        const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
+                        if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+                    }
+                };
+                
+                setValue('name', profile.name);
+                setValue('age_range', profile.age_range);
+                setValue('gender', profile.gender);
+                setValue('height', profile.height);
+                setValue('weight', profile.weight);
+                setValue('city', profile.city);
+                setValue('experience', profile.experience);
+                const paceOptions = ["over30", "25-30", "20-25", "under20"];
+                const pace5kSelect = document.getElementById('pace_5k');
+                if (pace5kSelect) {
+                    if (paceOptions.includes(profile.pace_5k)) { pace5kSelect.value = profile.pace_5k; }
+                    else if (profile.pace_5k) {
+                        pace5kSelect.value = 'specific_time';
+                        pace5kSelect.dispatchEvent(new Event('change'));
+                        setValue('pace_5k_specific', profile.pace_5k);
+                    }
+                }
+                if(profile.goals) setMultiSelect('goals', profile.goals);
+                setValue('target_weight', profile.target_weight);
+                setRadio('race_goal_exists', profile.race_goal_exists);
+                setValue('race_date', profile.race_date);
+                setValue('race_distance', profile.race_distance);
+                setValue('race_time_goal', profile.race_time_goal);
+                if(prefs) {
+                    setValue('training_days_per_week', prefs.training_days_per_week);
+                    setValue('weekly_volume_km', prefs.weekly_volume_km);
+                    setMultiSelect('preferred_time', prefs.preferred_time);
+                    setMultiSelect('preferred_terrain', prefs.preferred_terrain);
+                    setMultiSelect('favorite_workouts', prefs.favorite_workouts);
+                }
+                if(profile.food_preferences && profile.food_preferences.type) setMultiSelect('food_preferences', profile.food_preferences.type);
+                if(profile.food_preferences && profile.food_preferences.allergies) setValue('food_allergies', profile.food_preferences.allergies);
+                setValue('meals_per_day', profile.meals_per_day);
+                setRadio('drinks_coffee', profile.drinks_coffee);
+                if(profile.equipment && profile.equipment.items) setMultiSelect('equipment', profile.equipment.items);
+                if(profile.equipment && profile.equipment.other) setValue('equipment_other', profile.equipment.other);
+                setValue('supplements_info', profile.supplements_info);
+                setValue('additional_info', profile.additional_info);
             }
-            const profile = data.profile;
-            const prefs = data.preferences || {};
-            const setValue = (id, value) => { const el = document.getElementById(id); if (el && value !== null && value !== undefined) el.value = value; };
-            const setMultiSelect = (name, values) => {
-                if (values && Array.isArray(values)) {
-                    values.forEach(value => {
-                        const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
-                        if (cb) { cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+
+            async function fetchUserProfile() {
+                welcomeScreen.style.display = 'none';
+                form.style.display = 'none';
+                loadingScreen.style.display = 'flex';
+                // !!! ЗАМЕНИ URL на свой адрес от ngrok !!!
+                const backendUrl = `https://your-ngrok-url.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
+                try {
+                    const response = await fetch(backendUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    populateForm(data);
+                    loadingScreen.style.display = 'none';
+                    form.style.display = 'block';
+                } catch (error) {
+                    console.error("Ошибка при загрузке профиля:", error);
+                    loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте позже.</h1>';
+                }
+            }
+            
+            const setupConditionalDisplay = (triggerSelector, targetId) => {
+                const trigger = document.querySelector(triggerSelector);
+                const target = document.getElementById(targetId);
+                if (trigger && target) {
+                    trigger.addEventListener('change', (e) => {
+                        target.style.display = e.target.checked ? 'block' : 'none';
                     });
                 }
             };
-            const setRadio = (name, value) => {
-                if (value !== null && value !== undefined) {
-                    let strValue = String(value);
-                    if (typeof value === 'boolean') strValue = value ? 'yes' : 'no';
-                    const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
-                    if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+            const setupRadioDisplay = (radioName, targetId, showValue) => {
+                const target = document.getElementById(targetId);
+                if(target) {
+                    document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            target.style.display = (e.target.value === showValue) ? 'block' : 'none';
+                        });
+                    });
+                }
+            };
+            const setupSelectDisplay = (selectId, targetId, showValue) => {
+                const select = document.getElementById(selectId);
+                const target = document.getElementById(targetId);
+                if (select && target) {
+                     select.addEventListener('change', () => {
+                        target.style.display = (select.value === showValue) ? 'block' : 'none';
+                    });
                 }
             };
             
-            setValue('name', profile.name);
-            setValue('age_range', profile.age_range);
-            setValue('gender', profile.gender);
-            setValue('height', profile.height);
-            setValue('weight', profile.weight);
-            setValue('city', profile.city);
-            setValue('experience', profile.experience);
-            const paceOptions = ["over30", "25-30", "20-25", "under20"];
-            const pace5kSelect = document.getElementById('pace_5k');
-            if (pace5kSelect) {
-                if (paceOptions.includes(profile.pace_5k)) { 
-                    pace5kSelect.value = profile.pace_5k;
-                } else if (profile.pace_5k) { 
-                    pace5kSelect.value = 'specific_time';
-                    pace5kSelect.dispatchEvent(new Event('change'));
-                    setValue('pace_5k_specific', profile.pace_5k);
+            setupSelectDisplay('pace_5k', 'pace_5k_specific_group', 'specific_time');
+            setupConditionalDisplay('input[name="goals"][value="weight_loss"]', 'target_weight_group');
+            setupRadioDisplay('race_goal_exists', 'race_details_group', 'yes');
+            setupConditionalDisplay('input[name="food_preferences"][value="allergy"]', 'food_allergies_group');
+            setupConditionalDisplay('input[name="equipment"][value="other"]', 'equipment_other_group');
+
+            if (submitButton) {
+                submitButton.addEventListener('click', () => {
+                    const data = {};
+                    const getValue = (id) => document.getElementById(id)?.value || null;
+                    const getMultiSelect = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+                    const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || null;
+                    data.name = getValue('name');
+                    data.age_range = getValue('age_range');
+                    data.gender = getValue('gender');
+                    data.height = getValue('height');
+                    data.weight = getValue('weight');
+                    data.city = getValue('city');
+                    data.experience = getValue('experience');
+                    let pace_5k_select = document.getElementById('pace_5k');
+                    if (pace_5k_select && pace_5k_select.value === 'specific_time') { data.pace_5k = getValue('pace_5k_specific'); } else { data.pace_5k = pace_5k_select ? pace_5k_select.value : null; }
+                    data.goals = getMultiSelect('goals');
+                    if (data.goals.includes('weight_loss')) { data.target_weight = getValue('target_weight'); }
+                    const raceGoal = getRadio('race_goal_exists');
+                    data.race_goal_exists = raceGoal === 'yes';
+                    if (data.race_goal_exists) { data.race_date = getValue('race_date'); data.race_distance = getValue('race_distance'); data.race_time_goal = getValue('race_time_goal'); }
+                    data.training_days_per_week = getValue('training_days_per_week');
+                    data.weekly_volume_km = getValue('weekly_volume_km');
+                    data.preferred_time = getMultiSelect('preferred_time');
+                    data.preferred_terrain = getMultiSelect('preferred_terrain');
+                    data.favorite_workouts = getMultiSelect('favorite_workouts');
+                    data.food_preferences = { type: getMultiSelect('food_preferences'), allergies: null };
+                    if (data.food_preferences.type.includes('allergy')) { data.food_preferences.allergies = getValue('food_allergies'); }
+                    data.meals_per_day = getValue('meals_per_day');
+                    data.drinks_coffee = getRadio('drinks_coffee') === 'yes';
+                    data.equipment = { items: getMultiSelect('equipment'), other: null };
+                    if (data.equipment.items.includes('other')) { data.equipment.other = getValue('equipment_other'); }
+                    data.supplements_info = getValue('supplements_info');
+                    data.additional_info = getValue('additional_info');
+                    data.plan_start_date = getRadio('plan_start_date');
+                    if (tg) { tg.sendData(JSON.stringify(data)); tg.close(); }
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+
+            if (mode === 'edit') {
+                fetchUserProfile(); 
+            } else {
+                welcomeScreen.style.display = 'flex';
+                if (startButton) {
+                    startButton.addEventListener('click', () => {
+                        welcomeScreen.style.display = 'none';
+                        form.style.display = 'block';
+                    });
                 }
             }
-            if(profile.goals) setMultiSelect('goals', profile.goals);
-            setValue('target_weight', profile.target_weight);
-            setRadio('race_goal_exists', profile.race_goal_exists);
-            setValue('race_date', profile.race_date);
-            setValue('race_distance', profile.race_distance);
-            setValue('race_time_goal', profile.race_time_goal);
-            if(prefs) {
-                setValue('training_days_per_week', prefs.training_days_per_week);
-                setValue('weekly_volume_km', prefs.weekly_volume_km);
-                setMultiSelect('preferred_time', prefs.preferred_time);
-                setMultiSelect('preferred_terrain', prefs.preferred_terrain);
-                setMultiSelect('favorite_workouts', prefs.favorite_workouts);
-            }
-            if(profile.food_preferences && profile.food_preferences.type) setMultiSelect('food_preferences', profile.food_preferences.type);
-            if(profile.food_preferences && profile.food_preferences.allergies) setValue('food_allergies', profile.food_preferences.allergies);
-            setValue('meals_per_day', profile.meals_per_day);
-            setRadio('drinks_coffee', profile.drinks_coffee);
-            if(profile.equipment && profile.equipment.items) setMultiSelect('equipment', profile.equipment.items);
-            if(profile.equipment && profile.equipment.other) setValue('equipment_other', profile.equipment.other);
-            setValue('supplements_info', profile.supplements_info);
-            setValue('additional_info', profile.additional_info);
-        }
-
-        // --- НОВЫЙ БЛОК: Функция для ПОЛУЧЕНИЯ профиля с бэкенда ---
-        async function fetchUserProfile() {
-            welcomeScreen.style.display = 'none';
-            form.style.display = 'none';
-            loadingScreen.style.display = 'flex';
-            const backendUrl = `https://your-ngrok-url.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
-            try {
-                const response = await fetch(backendUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                populateForm(data);
-                loadingScreen.style.display = 'none';
-                form.style.display = 'block';
-            } catch (error) {
-                console.error("Ошибка при загрузке профиля:", error);
-                loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте позже.</h1>';
-            }
-        }
-        
-        // --- Логика для условного отображения полей ---
-        const setupConditionalDisplay = (triggerSelector, targetId) => {
-            const trigger = document.querySelector(triggerSelector);
-            const target = document.getElementById(targetId);
-            if (trigger && target) {
-                trigger.addEventListener('change', (e) => {
-                    target.style.display = e.target.checked ? 'block' : 'none';
-                });
-            }
-        };
-        const setupRadioDisplay = (radioName, targetId, showValue) => {
-            const target = document.getElementById(targetId);
-            if (target) {
-                document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
-                    radio.addEventListener('change', (e) => {
-                        target.style.display = (e.target.value === showValue) ? 'block' : 'none';
-                    });
-                });
-            }
-        };
-        const setupSelectDisplay = (selectId, targetId, showValue) => {
-            const select = document.getElementById(selectId);
-            const target = document.getElementById(targetId);
-            if (select && target) {
-                select.addEventListener('change', () => {
-                    target.style.display = (select.value === showValue) ? 'block' : 'none';
-                });
-            }
-        };
-
-        // --- Инициализация всех интерактивных элементов ---
-        setupSelectDisplay('pace_5k', 'pace_5k_specific_group', 'specific_time');
-        setupConditionalDisplay('input[name="goals"][value="weight_loss"]', 'target_weight_group');
-        setupRadioDisplay('race_goal_exists', 'race_details_group', 'yes');
-        setupConditionalDisplay('input[name="food_preferences"][value="allergy"]', 'food_allergies_group');
-        setupConditionalDisplay('input[name="equipment"][value="other"]', 'equipment_other_group');
-        
-        // --- Логика для главной кнопки отправки ---
-        if (submitButton) {
-            submitButton.addEventListener('click', () => {
-                const data = {};
-                const getValue = (id) => document.getElementById(id)?.value || null;
-                const getMultiSelect = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-                const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || null;
-                data.name = getValue('name');
-                data.age_range = getValue('age_range');
-                data.gender = getValue('gender');
-                data.height = getValue('height');
-                data.weight = getValue('weight');
-                data.city = getValue('city');
-                data.experience = getValue('experience');
-                let pace_5k_select = document.getElementById('pace_5k');
-                if (pace_5k_select && pace_5k_select.value === 'specific_time') { data.pace_5k = getValue('pace_5k_specific'); } else { data.pace_5k = pace_5k_select ? pace_5k_select.value : null; }
-                data.goals = getMultiSelect('goals');
-                if (data.goals.includes('weight_loss')) { data.target_weight = getValue('target_weight'); }
-                const raceGoal = getRadio('race_goal_exists');
-                data.race_goal_exists = raceGoal === 'yes';
-                if (data.race_goal_exists) { data.race_date = getValue('race_date'); data.race_distance = getValue('race_distance'); data.race_time_goal = getValue('race_time_goal'); }
-                data.training_days_per_week = getValue('training_days_per_week');
-                data.weekly_volume_km = getValue('weekly_volume_km');
-                data.preferred_time = getMultiSelect('preferred_time');
-                data.preferred_terrain = getMultiSelect('preferred_terrain');
-                data.favorite_workouts = getMultiSelect('favorite_workouts');
-                data.food_preferences = { type: getMultiSelect('food_preferences'), allergies: null };
-                if (data.food_preferences.type.includes('allergy')) { data.food_preferences.allergies = getValue('food_allergies'); }
-                data.meals_per_day = getValue('meals_per_day');
-                data.drinks_coffee = getRadio('drinks_coffee') === 'yes';
-                data.equipment = { items: getMultiSelect('equipment'), other: null };
-                if (data.equipment.items.includes('other')) { data.equipment.other = getValue('equipment_other'); }
-                data.supplements_info = getValue('supplements_info');
-                data.additional_info = getValue('additional_info');
-                data.plan_start_date = getRadio('plan_start_date');
-                if (tg) { tg.sendData(JSON.stringify(data)); tg.close(); }
-            });
-        }
-
-        // --- НОВАЯ ЛОГИКА, которая решает, что показать при старте ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const mode = urlParams.get('mode');
-
-        if (mode === 'edit') {
-            fetchUserProfile(); 
-        } else { // 'new' или ничего не указано
-            welcomeScreen.style.display = 'flex';
-            if (startButton) {
-                startButton.addEventListener('click', () => {
-                    welcomeScreen.style.display = 'none';
-                    form.style.display = 'block';
-                });
-            }
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
