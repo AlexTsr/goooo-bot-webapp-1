@@ -384,6 +384,119 @@
         const startButton = document.getElementById('start-button');
         const submitButton = document.getElementById('submit-button');
 
+
+
+        // --- Функция для ЗАПОЛНЕНИЯ формы данными из профиля ---
+        function populateForm(data) {
+            if (!data || !data.profile) {
+                console.error("Некорректные данные профиля получены.");
+                loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
+                return;
+            }
+            const profile = data.profile;
+            const prefs = data.preferences || {};
+
+            // --- Хелперы для удобства ---
+            const setValue = (id, value) => {
+                const el = document.getElementById(id);
+                if (el && value !== null && value !== undefined) el.value = value;
+            };
+            const setMultiSelect = (name, values) => {
+                if (values && Array.isArray(values)) {
+                    values.forEach(value => {
+                        const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                        if (cb) {
+                            cb.checked = true;
+                            cb.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    });
+                }
+            };
+            const setRadio = (name, value) => {
+                if (value !== null && value !== undefined) {
+                    const strValue = String(value); // Для boolean
+                    const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            };
+            
+            // --- Заполняем все поля ---
+            setValue('name', profile.name);
+            setValue('age_range', profile.age_range);
+            setValue('gender', profile.gender);
+            setValue('height', profile.height);
+            setValue('weight', profile.weight);
+            setValue('city', profile.city);
+            setValue('experience', profile.experience);
+            
+            // Для 5к темпа
+            const paceOptions = ["over30", "25-30", "20-25", "under20"];
+            if (paceOptions.includes(profile.pace_5k)) {
+                setValue('pace_5k', profile.pace_5k);
+            } else if (profile.pace_5k) {
+                setValue('pace_5k', 'specific_time');
+                document.getElementById('pace_5k').dispatchEvent(new Event('change'));
+                setValue('pace_5k_specific', profile.pace_5k);
+            }
+
+            setMultiSelect('goals', profile.goals);
+            setValue('target_weight', profile.target_weight);
+            setRadio('race_goal_exists', profile.race_goal_exists ? 'yes' : 'no');
+            setValue('race_date', profile.race_date);
+            setValue('race_distance', profile.race_distance);
+            setValue('race_time_goal', profile.race_time_goal);
+            
+            setValue('training_days_per_week', prefs.training_days_per_week);
+            setValue('weekly_volume_km', prefs.weekly_volume_km);
+            setMultiSelect('preferred_time', prefs.preferred_time);
+            setMultiSelect('preferred_terrain', prefs.preferred_terrain);
+            setMultiSelect('favorite_workouts', prefs.favorite_workouts);
+
+            setMultiSelect('food_preferences', profile.food_preferences);
+            setValue('food_allergies', profile.food_allergies);
+            setValue('meals_per_day', profile.meals_per_day);
+            setRadio('drinks_coffee', profile.drinks_coffee ? 'yes' : 'no');
+
+            setMultiSelect('equipment', profile.equipment);
+            setValue('equipment_other', profile.equipment_other);
+            setValue('supplements_info', profile.supplements_info);
+            setValue('additional_info', profile.additional_info);
+            
+            setRadio('plan_start_date', profile.plan_start_date);
+        }
+
+        // --- Функция для ПОЛУЧЕНИЯ профиля пользователя с бэкенда ---
+        async function fetchUserProfile() {
+            welcomeScreen.style.display = 'none';
+            form.style.display = 'none';
+            loadingScreen.style.display = 'flex';
+
+            // !!! ВАЖНО: Укажи здесь адрес, по которому работает твой backend.py !!!
+            const backendUrl = `https://your-ngrok-address.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
+
+            try {
+                const response = await fetch(backendUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const data = await response.json();
+                populateForm(data); // Заполняем форму полученными данными
+
+                loadingScreen.style.display = 'none';
+                form.style.display = 'block';
+
+            } catch (error) {
+                console.error("Ошибка при загрузке профиля:", error);
+                loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте позже.</h1>';
+            }
+        }
+
+
+
+
+
         // --- Логика для условного отображения полей ---
         const setupConditionalDisplay = (triggerSelector, targetId) => {
             const trigger = document.querySelector(triggerSelector);
@@ -516,8 +629,23 @@
         } else {
             welcomeScreen.style.display = 'flex';
         }
-    });
-</script>
 
+
+
+        // --- НАША НОВАЯ ЛОГИКА, которая решает, что показать при старте ---
+        const startParam = tg.initDataUnsafe.start_param;
+        if (startParam === 'edit_profile') {
+            fetchUserProfile(); 
+        } else {
+            welcomeScreen.style.display = 'flex';
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    welcomeScreen.style.display = 'none';
+                    form.style.display = 'block';
+                });
+            }
+        }
+    });
+    </script>
 </body>
 </html>
