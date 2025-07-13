@@ -377,76 +377,74 @@
             const submitButton = document.getElementById('submit-button');
 
             function populateForm(data) {
+                // Проверяем, что данные вообще пришли
                 if (!data || !data.profile) {
-                    console.error("Некорректные данные профиля получены.");
+                    console.error("populateForm: Некорректные данные профиля получены от бэкенда.");
                     loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
                     return;
                 }
+
                 const profile = data.profile;
                 const prefs = data.preferences || {};
 
-                // --- Вспомогательные функции для установки значений ---
+                // --- Вспомогательные функции, которые мы будем использовать ---
                 const setValue = (id, value) => {
                     const el = document.getElementById(id);
                     if (el && value !== null && value !== undefined) {
                         el.value = value;
                     }
                 };
+
                 const setMultiSelect = (name, values) => {
-                    if (values && Array.isArray(values)) {
-                        values.forEach(value => {
-                            const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
-                            if (cb) {
-                                cb.checked = true;
-                                // Инициируем событие, чтобы сработала условная логика (показать доп. поля)
-                                cb.dispatchEvent(new Event('change', { bubbles: true }));
-                            }
-                        });
-                    }
+                    if (!Array.isArray(values)) return;
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(checkbox => {
+                        if (values.includes(checkbox.value)) {
+                            checkbox.checked = true;
+                            // Инициируем событие, чтобы сработала логика показа доп. полей
+                            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    });
                 };
+
                 const setRadio = (name, value) => {
-                    if (value !== null && value !== undefined) {
-                        let strValue = String(value);
-                        // Преобразуем boolean в 'yes'/'no' для радио-кнопок
-                        if (typeof value === 'boolean') {
-                            strValue = value ? 'yes' : 'no';
-                        }
-                        const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
-                        if (radio) {
-                            radio.checked = true;
-                            radio.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
+                    if (value === null || value === undefined) return;
+                    // Преобразуем boolean (true/false) в строки 'yes'/'no' для радио-кнопок
+                    const strValue = (typeof value === 'boolean') ? (value ? 'yes' : 'no') : String(value);
+                    const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 };
 
-                // --- Заполняем все поля, используя хелперы ---
+                // --- 1. Заполняем секцию "О тебе" ---
                 setValue('name', profile.name);
                 setValue('age_range', profile.age_range);
                 setValue('gender', profile.gender);
                 setValue('height', profile.height);
                 setValue('weight', profile.weight);
                 setValue('city', profile.city);
-                setValue('experience', profile.experience);
 
+                // --- 2. Заполняем секцию "Беговой опыт" ---
+                setValue('experience', profile.experience);
                 const paceOptions = ["over30", "25-30", "20-25", "under20"];
-                const pace5kSelect = document.getElementById('pace_5k');
-                if (pace5kSelect) {
-                    if (paceOptions.includes(profile.pace_5k)) {
-                        pace5kSelect.value = profile.pace_5k;
-                    } else if (profile.pace_5k) {
-                        pace5kSelect.value = 'specific_time';
-                        pace5kSelect.dispatchEvent(new Event('change'));
-                        setValue('pace_5k_specific', profile.pace_5k);
-                    }
+                if (paceOptions.includes(profile.pace_5k)) {
+                    setValue('pace_5k', profile.pace_5k);
+                } else if (profile.pace_5k) {
+                    setValue('pace_5k', 'specific_time');
+                    document.getElementById('pace_5k').dispatchEvent(new Event('change'));
+                    setValue('pace_5k_specific', profile.pace_5k);
                 }
 
-                if (profile.goals) setMultiSelect('goals', profile.goals);
+                // --- 3. Заполняем секцию "Цели" ---
+                setMultiSelect('goals', profile.goals);
                 setValue('target_weight', profile.target_weight);
                 setRadio('race_goal_exists', profile.race_goal_exists);
                 setValue('race_date', profile.race_date);
                 setValue('race_distance', profile.race_distance);
                 setValue('race_time_goal', profile.race_time_goal);
-                
+
+                // --- 4. Заполняем секцию "Предпочтения" (из объекта prefs) ---
                 if (prefs) {
                     setValue('training_days_per_week', prefs.training_days_per_week);
                     setValue('weekly_volume_km', prefs.weekly_volume_km);
@@ -454,29 +452,25 @@
                     setMultiSelect('preferred_terrain', prefs.preferred_terrain);
                     setMultiSelect('favorite_workouts', prefs.favorite_workouts);
                 }
-                
-                // Правильно обрабатываем вложенные JSON
-                if (profile.food_preferences && profile.food_preferences.type) {
+
+                // --- 5. Заполняем секцию "О питании" (с учетом вложенности) ---
+                if (profile.food_preferences) {
                     setMultiSelect('food_preferences', profile.food_preferences.type);
-                }
-                if (profile.food_preferences && profile.food_preferences.allergies) {
                     setValue('food_allergies', profile.food_preferences.allergies);
                 }
-
                 setValue('meals_per_day', profile.meals_per_day);
                 setRadio('drinks_coffee', profile.drinks_coffee);
-                
-                if (profile.equipment && profile.equipment.items) {
+
+                // --- 6. Заполняем секцию "Прочее" (с учетом вложенности) ---
+                if (profile.equipment) {
                     setMultiSelect('equipment', profile.equipment.items);
-                }
-                if (profile.equipment && profile.equipment.other) {
                     setValue('equipment_other', profile.equipment.other);
                 }
-
                 setValue('supplements_info', profile.supplements_info);
                 setValue('additional_info', profile.additional_info);
-            }
 
+                // Дата начала не хранится в профиле, поэтому не трогаем ее
+            }
             async function fetchUserProfile() {
                 welcomeScreen.style.display = 'none';
                 form.style.display = 'none';
