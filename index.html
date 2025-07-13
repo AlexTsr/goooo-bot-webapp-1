@@ -385,18 +385,24 @@
                 const profile = data.profile;
                 const prefs = data.preferences || {};
 
+                // --- Вспомогательные функции для установки значений ---
                 const setValue = (id, value) => {
                     const el = document.getElementById(id);
-                    if (el && value !== null && value !== undefined) el.value = value;
+                    if (el && value !== null && value !== undefined) {
+                        el.value = value;
+                    }
                 };
 
                 const setMultiSelect = (name, values) => {
                     if (values && Array.isArray(values)) {
+                        // Сначала снимаем все галочки в группе
+                        document.querySelectorAll(`input[name="${name}"]`).forEach(cb => cb.checked = false);
+                        // Затем ставим только нужные
                         values.forEach(value => {
                             const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
                             if (cb) {
                                 cb.checked = true;
-                                // Инициируем событие 'change', чтобы сработала условная логика (например, показать поле для аллергии)
+                                // Инициируем событие, чтобы сработала условная логика (показать доп. поля)
                                 cb.dispatchEvent(new Event('change', { bubbles: true }));
                             }
                         });
@@ -406,6 +412,7 @@
                 const setRadio = (name, value) => {
                     if (value !== null && value !== undefined) {
                         let strValue = String(value);
+                        // Преобразуем boolean в 'yes'/'no' для радио-кнопок
                         if (typeof value === 'boolean') {
                             strValue = value ? 'yes' : 'no';
                         }
@@ -417,7 +424,7 @@
                     }
                 };
                 
-                // --- Заполняем все поля ---
+                // --- Заполняем все поля, используя хелперы ---
                 setValue('name', profile.name);
                 setValue('age_range', profile.age_range);
                 setValue('gender', profile.gender);
@@ -425,7 +432,7 @@
                 setValue('weight', profile.weight);
                 setValue('city', profile.city);
                 setValue('experience', profile.experience);
-                
+
                 const paceOptions = ["over30", "25-30", "20-25", "under20"];
                 const pace5kSelect = document.getElementById('pace_5k');
                 if (pace5kSelect) {
@@ -433,7 +440,7 @@
                         pace5kSelect.value = profile.pace_5k;
                     } else if (profile.pace_5k) {
                         pace5kSelect.value = 'specific_time';
-                        pace5kSelect.dispatchEvent(new Event('change'));
+                        pace5kSelect.dispatchEvent(new Event('change')); // Показываем поле для ввода
                         setValue('pace_5k_specific', profile.pace_5k);
                     }
                 }
@@ -452,9 +459,8 @@
                     setMultiSelect('preferred_terrain', prefs.preferred_terrain);
                     setMultiSelect('favorite_workouts', prefs.favorite_workouts);
                 }
-
-                // <<<< ИСПРАВЛЕНИЕ ЗДЕСЬ >>>>
-                // Правильно разбираем вложенные объекты
+                
+                // Правильно обрабатываем вложенные JSON
                 if(profile.food_preferences && profile.food_preferences.type) {
                     setMultiSelect('food_preferences', profile.food_preferences.type);
                 }
@@ -464,7 +470,7 @@
 
                 setValue('meals_per_day', profile.meals_per_day);
                 setRadio('drinks_coffee', profile.drinks_coffee);
-
+                
                 if(profile.equipment && profile.equipment.items) {
                     setMultiSelect('equipment', profile.equipment.items);
                 }
@@ -480,7 +486,6 @@
                 welcomeScreen.style.display = 'none';
                 form.style.display = 'none';
                 loadingScreen.style.display = 'flex';
-                // !!! ЗАМЕНИ URL на свой адрес от ngrok !!!
                 const backendUrl = `https://83de54c6102e.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
                 
                 try {
