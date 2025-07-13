@@ -139,7 +139,7 @@
 
     <form id="onboarding-form">
         <div class="form-section">
-            <h2>1. О тебе</h2>
+            <h2>1. О тебе БУБ</h2>
             <div class="form-group">
                 <label for="name">Как тебя зовут?</label>
                 <input type="text" id="name" name="name" placeholder="Алексей">
@@ -376,104 +376,120 @@
             const startButton = document.getElementById('start-button');
             const submitButton = document.getElementById('submit-button');
 
-                        function populateForm(data) {
-                if (!data || !data.profile) {
-                    console.error("populateForm: Некорректные данные профиля получены от бэкенда.");
-                    loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
-                    return;
-                }
+            function populateForm(data) {
+    if (!data || !data.profile) {
+        console.error("populateForm: Некорректные данные профиля получены от бэкенда.");
+        loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
+        return;
+    }
 
-                const profile = data.profile;
-                const prefs = data.preferences || {};
+    const profile = data.profile;
+    const prefs = data.preferences || {};
 
-                const setValue = (id, value) => {
-                    const el = document.getElementById(id);
-                    if (el && value !== null && value !== undefined) {
-                        el.value = value;
-                    }
-                };
+    // --- Вспомогательные функции ---
 
-                const setMultiSelect = (name, values) => {
-                    if (!Array.isArray(values)) return;
-                    document.querySelectorAll(`input[name="${name}"]`).forEach(checkbox => {
-                        if (values.includes(checkbox.value)) {
-                            checkbox.checked = true;
-                            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    });
-                };
-                
-                const setRadio = (name, value) => {
-                    if (value === null || value === undefined) return;
-                    const strValue = (typeof value === 'boolean') ? (value ? 'yes' : 'no') : String(value);
-                    const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
-                    if (radio) {
-                        radio.checked = true;
-                        radio.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                };
-                
-                // 1. Заполняем секцию "О тебе"
-                setValue('name', profile.name);
-                setValue('age_range', profile.age_range);
-                setValue('gender', profile.gender);
-                setValue('height', profile.height);
-                setValue('weight', profile.weight);
-                setValue('city', profile.city);
+    // Стандартная функция для установки значения в input, textarea
+    const setValue = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value !== null && value !== undefined) {
+            el.value = value;
+        }
+    };
 
-                // 2. Заполняем секцию "Беговой опыт"
-                setValue('experience', profile.experience);
-                const paceOptions = ["over30", "25-30", "20-25", "under20"];
-                const pace5kSelect = document.getElementById('pace_5k');
-                if (pace5kSelect) {
-                    if (paceOptions.includes(profile.pace_5k)) {
-                        pace5kSelect.value = profile.pace_5k;
-                    } else if (profile.pace_5k) {
-                        pace5kSelect.value = 'specific_time';
-                        pace5kSelect.dispatchEvent(new Event('change'));
-                        setValue('pace_5k_specific', profile.pace_5k);
-                    }
-                }
-
-                // 3. Заполняем секцию "Цели"
-                if (profile.goals && profile.goals.main) {
-                    setMultiSelect('goals', profile.goals.main);
-                }
-                setValue('target_weight', profile.target_weight);
-                setRadio('race_goal_exists', profile.race_goal_exists);
-                setValue('race_date', profile.race_date);
-                setValue('race_distance', profile.race_distance);
-                setValue('race_time_goal', profile.race_time_goal);
-                
-                // 4. Заполняем секцию "Предпочтения"
-                if (prefs) {
-                    setValue('training_days_per_week', prefs.training_days_per_week);
-                    setValue('weekly_volume_km', prefs.weekly_volume_km);
-                    setMultiSelect('preferred_time', prefs.preferred_time);
-                    setMultiSelect('preferred_terrain', prefs.preferred_terrain);
-                    setMultiSelect('favorite_workouts', prefs.favorite_workouts);
-                }
-                
-                // 5. Заполняем секцию "О питании"
-                if (profile.food_preferences && profile.food_preferences.type) {
-                    setMultiSelect('food_preferences', profile.food_preferences.type);
-                }
-                if (profile.food_preferences && profile.food_preferences.allergies) {
-                    setValue('food_allergies', profile.food_preferences.allergies);
-                }
-                setValue('meals_per_day', profile.meals_per_day);
-                setRadio('drinks_coffee', profile.drinks_coffee);
-                
-                // 6. Заполняем секцию "Прочее"
-                if (profile.equipment && profile.equipment.items) {
-                    setMultiSelect('equipment', profile.equipment.items);
-                }
-                if (profile.equipment && profile.equipment.other) {
-                    setValue('equipment_other', profile.equipment.other);
-                }
-                setValue('supplements_info', profile.supplements_info);
-                setValue('additional_info', profile.additional_info);
+    // НОВАЯ ЛОГИКА: Устанавливает значение <select> по видимому тексту
+    const setSelectByText = (id, text) => {
+        const select = document.getElementById(id);
+        if (!select || text === null || text === undefined) return;
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].textContent.trim() === String(text).trim()) {
+                select.value = select.options[i].value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                break;
             }
+        }
+    };
+
+    // НОВАЯ ЛОГИКА: Устанавливает чекбоксы по видимому тексту
+    const setMultiSelectByText = (name, values) => {
+        if (!Array.isArray(values)) return;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(checkbox => {
+            // Ищем текст в соседнем <span>
+            const labelText = checkbox.nextElementSibling?.textContent.trim();
+            if (labelText && values.map(v => String(v).trim()).includes(labelText)) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    };
+    
+    // Функция для радио-кнопок остается без изменений
+    const setRadio = (name, value) => {
+        if (value === null || value === undefined) return;
+        const strValue = (typeof value === 'boolean') ? (value ? 'yes' : 'no') : String(value);
+        const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
+        if (radio) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+    
+    // --- 1. О тебе ---
+    setValue('name', profile.name);
+    setValue('age_range', profile.age_range);
+    setValue('gender', profile.gender);
+    setValue('height', profile.height);
+    setValue('weight', profile.weight);
+    setValue('city', profile.city);
+
+    // --- 2. Беговой опыт ---
+    setSelectByText('experience', profile.experience); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+    const paceOptions = ["over30", "25-30", "20-25", "under20"];
+    const pace5kSelect = document.getElementById('pace_5k');
+    if (pace5kSelect) {
+        if (paceOptions.includes(profile.pace_5k)) {
+            pace5kSelect.value = profile.pace_5k;
+        } else if (profile.pace_5k) {
+            pace5kSelect.value = 'specific_time';
+            setValue('pace_5k_specific', profile.pace_5k);
+            pace5kSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // --- 3. Цели ---
+    setMultiSelectByText('goals', profile.goals?.main); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+    setValue('target_weight', profile.target_weight);
+    setRadio('race_goal_exists', profile.race_goal_exists);
+    setValue('race_date', profile.race_date);
+    setValue('race_distance', profile.race_distance);
+    setValue('race_time_goal', profile.race_time_goal);
+    
+    // --- 4. Предпочтения ---
+    if (prefs) {
+        setValue('training_days_per_week', prefs.training_days_per_week);
+        setValue('weekly_volume_km', prefs.weekly_volume_km);
+        setMultiSelectByText('preferred_time', prefs.preferred_time); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+        setMultiSelectByText('preferred_terrain', prefs.preferred_terrain); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+        setMultiSelectByText('favorite_workouts', prefs.favorite_workouts); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+    }
+    
+    // --- 5. О питании ---
+    if (profile.food_preferences) {
+        setMultiSelectByText('food_preferences', profile.food_preferences.type); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+        setValue('food_allergies', profile.food_preferences.allergies);
+    }
+    setValue('meals_per_day', profile.meals_per_day);
+    setRadio('drinks_coffee', profile.drinks_coffee);
+    
+    // --- 6. Прочее ---
+    if (profile.equipment) {
+        setMultiSelectByText('equipment', profile.equipment.items); // ИСПОЛЬЗУЕМ НОВУЮ ФУНКЦИЮ
+        setValue('equipment_other', profile.equipment.other);
+    }
+    setValue('supplements_info', profile.supplements_info);
+    setValue('additional_info', profile.additional_info);
+
+    // Дата начала не хранится в профиле, поэтому не трогаем ее
+}
             async function fetchUserProfile() {
                 welcomeScreen.style.display = 'none';
                 form.style.display = 'none';
