@@ -392,12 +392,8 @@
                         el.value = value;
                     }
                 };
-
                 const setMultiSelect = (name, values) => {
                     if (values && Array.isArray(values)) {
-                        // Сначала снимаем все галочки в группе
-                        document.querySelectorAll(`input[name="${name}"]`).forEach(cb => cb.checked = false);
-                        // Затем ставим только нужные
                         values.forEach(value => {
                             const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
                             if (cb) {
@@ -408,7 +404,6 @@
                         });
                     }
                 };
-                
                 const setRadio = (name, value) => {
                     if (value !== null && value !== undefined) {
                         let strValue = String(value);
@@ -423,7 +418,7 @@
                         }
                     }
                 };
-                
+
                 // --- Заполняем все поля, используя хелперы ---
                 setValue('name', profile.name);
                 setValue('age_range', profile.age_range);
@@ -440,19 +435,19 @@
                         pace5kSelect.value = profile.pace_5k;
                     } else if (profile.pace_5k) {
                         pace5kSelect.value = 'specific_time';
-                        pace5kSelect.dispatchEvent(new Event('change')); // Показываем поле для ввода
+                        pace5kSelect.dispatchEvent(new Event('change'));
                         setValue('pace_5k_specific', profile.pace_5k);
                     }
                 }
 
-                if(profile.goals) setMultiSelect('goals', profile.goals);
+                if (profile.goals) setMultiSelect('goals', profile.goals);
                 setValue('target_weight', profile.target_weight);
                 setRadio('race_goal_exists', profile.race_goal_exists);
                 setValue('race_date', profile.race_date);
                 setValue('race_distance', profile.race_distance);
                 setValue('race_time_goal', profile.race_time_goal);
                 
-                if(prefs) {
+                if (prefs) {
                     setValue('training_days_per_week', prefs.training_days_per_week);
                     setValue('weekly_volume_km', prefs.weekly_volume_km);
                     setMultiSelect('preferred_time', prefs.preferred_time);
@@ -461,20 +456,20 @@
                 }
                 
                 // Правильно обрабатываем вложенные JSON
-                if(profile.food_preferences && profile.food_preferences.type) {
+                if (profile.food_preferences && profile.food_preferences.type) {
                     setMultiSelect('food_preferences', profile.food_preferences.type);
                 }
-                if(profile.food_preferences && profile.food_preferences.allergies) {
+                if (profile.food_preferences && profile.food_preferences.allergies) {
                     setValue('food_allergies', profile.food_preferences.allergies);
                 }
 
                 setValue('meals_per_day', profile.meals_per_day);
                 setRadio('drinks_coffee', profile.drinks_coffee);
                 
-                if(profile.equipment && profile.equipment.items) {
+                if (profile.equipment && profile.equipment.items) {
                     setMultiSelect('equipment', profile.equipment.items);
                 }
-                if(profile.equipment && profile.equipment.other) {
+                if (profile.equipment && profile.equipment.other) {
                     setValue('equipment_other', profile.equipment.other);
                 }
 
