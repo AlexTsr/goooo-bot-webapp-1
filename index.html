@@ -448,13 +448,18 @@
                 loadingScreen.style.display = 'flex';
                 // !!! ЗАМЕНИ URL на свой адрес от ngrok !!!
                 const backendUrl = `https://83de54c6102e.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
+                
                 try {
-                    const response = await fetch(backendUrl);
+                    // <<<< ЗАМЕНИ ЭТУ СТРОКУ >>>>
+                    const response = await fetch(backendUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+                    
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
                     const data = await response.json();
                     populateForm(data);
                     loadingScreen.style.display = 'none';
                     form.style.display = 'block';
+
                 } catch (error) {
                     console.error("Ошибка при загрузке профиля:", error);
                     loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте позже.</h1>';
