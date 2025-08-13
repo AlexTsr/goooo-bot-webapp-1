@@ -3,301 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Анкета тренера</title>
+    <title>Тестовая анкета</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #1a1a1a;
-            --form-bg-color: #2c2c2c;
-            --text-color: #ffffff;
-            --label-color: #a0a0a0;
-            --input-bg-color: #3a3a3a;
-            --button-accent-bg: #007bff;
-            --button-choice-bg: #4a4a4a;
-            --button-choice-selected-bg: #007bff;
-            --border-color: #444444;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #loading-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 40px);
-            text-align: center;
-        }
-        #onboarding-form {
-            display: none;
-            width: 100%;
-            max-width: 500px;
-        }
-        .form-section {
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            background-color: var(--form-bg-color);
-        }
-        .form-section h2 {
-            margin-top: 0;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--label-color);
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .checkbox-label {
-            display: block;
-            background-color: var(--button-choice-bg);
-            border-radius: 8px;
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .checkbox-label input { display: none; }
-        .checkbox-label:has(input:checked) {
-             background-color: var(--button-choice-selected-bg);
-        }
-        .submit-button {
-            background-color: var(--button-accent-bg);
-            color: var(--text-color);
-            border: none;
-            border-radius: 8px;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .submit-button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-        .hidden { display: none !important; }
+        body { font-family: sans-serif; padding: 20px; background-color: #222; color: #fff; }
+        input { width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; }
+        button { width: 100%; padding: 15px; font-size: 18px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="loading-screen">
-        <h1>Загрузка...</h1>
+    <h1>Тестовая форма</h1>
+    <div class="form-group">
+        <label for="name">Твое имя:</label>
+        <input type="text" id="name" name="name" value="Тестовый пользователь">
     </div>
-    <form id="onboarding-form">
-        <!-- Секция 1: О тебе -->
-        <div class="form-section">
-            <h2>О тебе</h2>
-            <div class="form-group">
-                <label for="name">Имя</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="age_range">Возраст</label>
-                <select id="age_range" name="age_range" required>
-                    <option value="" disabled selected>Выбери диапазон</option>
-                    <option value="<18">&lt;18</option>
-                    <option value="18-25">18-25</option>
-                    <option value="26-35">26-35</option>
-                    <option value="36-45">36-45</option>
-                    <option value="46-55">46-55</option>
-                    <option value="55+">55+</option>
-                </select>
-            </div>
-             <div class="form-group">
-                <label for="gender">Пол</label>
-                <select id="gender" name="gender" required>
-                    <option value="" disabled selected>Выбери пол</option>
-                    <option value="male">Мужской</option>
-                    <option value="female">Женский</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="height">Рост (см)</label>
-                <input type="number" id="height" name="height" required>
-            </div>
-            <div class="form-group">
-                <label for="weight">Вес (кг)</label>
-                <input type="text" id="weight" name="weight" required>
-            </div>
-             <div class="form-group">
-                <label for="city">Город (для прогноза погоды)</label>
-                <input type="text" id="city" name="city">
-            </div>
-        </div>
-
-        <!-- Секция 2: Опыт и цели -->
-        <div class="form-section">
-            <h2>Опыт и цели</h2>
-            <div class="form-group">
-                <label for="experience">Беговой опыт</label>
-                <select id="experience" name="experience" required>
-                    <option value="Новичок (<6 мес)">Новичок (&lt;6 мес)</option>
-                    <option value="Любитель (6 мес – 2 года)">Любитель (6 мес – 2 года)</option>
-                    <option value="Опытный (>2 лет)">Опытный (&gt;2 лет)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Основные цели (можно несколько)</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Полумарафон"> <span>Полумарафон</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Марафон"> <span>Марафон</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Улучшить результаты"> <span>Улучшить результаты</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Снизить вес"> <span>Снизить вес</span></label>
-                </div>
-            </div>
-            <div class="form-group hidden" id="target_weight_group">
-                <label for="target_weight">Целевой вес (кг)</label>
-                <input type="text" id="target_weight" name="target_weight">
-            </div>
-        </div>
-        
-        <!-- Другие секции можно добавить по аналогии -->
-
-        <button type="button" id="submit-button" class="submit-button">Готово!</button>
-    </form>
+    <button id="submit-button">Отправить данные</button>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const form = document.getElementById('onboarding-form');
-        const loadingScreen = document.getElementById('loading-screen');
         const submitButton = document.getElementById('submit-button');
-
-        // --- Логика отображения скрытых полей ---
-        const weightLossCheckbox = document.querySelector('input[name="goals"][value="Снизить вес"]');
-        const targetWeightGroup = document.getElementById('target_weight_group');
-        weightLossCheckbox.addEventListener('change', () => {
-            targetWeightGroup.classList.toggle('hidden', !weightLossCheckbox.checked);
-        });
-
-        // --- Функция запроса данных с бэкенда ---
-        async function fetchUserProfile() {
-            // ВАЖНО: Этот URL нужно будет заменить на актуальный адрес твоего бэкенда
-            // Например, на адрес ngrok во время локальной разработки
-            const backendUrl = `https://ccae1e99f45c.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
-
-            try {
-                const response = await fetch(backendUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                populateForm(data);
-            } catch (error) {
-                console.error("Ошибка при загрузке профиля:", error);
-                loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте перезапустить анкету.</h1>';
-            }
-        }
-
-        // --- Функция заполнения формы ---
-        function populateForm(data) {
-            if (!data || !data.profile) return;
-            const profile = data.profile;
-            
-            document.getElementById('name').value = profile.name || '';
-            document.getElementById('age_range').value = profile.age_range || '';
-            document.getElementById('gender').value = profile.gender || '';
-            document.getElementById('height').value = profile.height || '';
-            document.getElementById('weight').value = profile.weight || '';
-            document.getElementById('city').value = profile.city || '';
-            document.getElementById('experience').value = profile.experience || '';
-            
-            if (profile.goals && Array.isArray(profile.goals.main)) {
-                profile.goals.main.forEach(goal => {
-                    const checkbox = document.querySelector(`input[name="goals"][value="${goal}"]`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
-            if (document.querySelector('input[name="goals"][value="Снизить вес"]').checked) {
-                targetWeightGroup.classList.remove('hidden');
-                document.getElementById('target_weight').value = profile.target_weight || '';
-            }
-        }
-
-        // --- Логика кнопки "Готово!" ---
+        
         submitButton.addEventListener('click', () => {
-            // Проверяем, что все обязательные поля заполнены
-            if (!form.checkValidity()) {
-                tg.showAlert('Пожалуйста, заполни все обязательные поля.');
-                return;
-            }
+            const data = {
+                profile: {
+                    name: document.getElementById('name').value
+                },
+                preferences: {} // Пустой объект, как и ожидает Python
+            };
 
-            submitButton.disabled = true;
-            submitButton.textContent = 'Отправка...';
-
-            setTimeout(() => {
-                try {
-                    const profileData = {
-                        name: document.getElementById('name').value,
-                        age_range: document.getElementById('age_range').value,
-                        gender: document.getElementById('gender').value,
-                        height: document.getElementById('height').value,
-                        weight: document.getElementById('weight').value,
-                        city: document.getElementById('city').value,
-                        experience: document.getElementById('experience').value,
-                        goals: {
-                            main: Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(cb => cb.value)
-                        },
-                        target_weight: document.getElementById('target_weight').value
-                    };
-                    
-                    // Для простоты пока отправляем только профиль
-                    const finalData = { profile: profileData, preferences: {} };
-
-                    tg.sendData(JSON.stringify(finalData));
-                    tg.close();
-                } catch (error) {
-                    console.error("Ошибка при отправке данных:", error);
-                    tg.showAlert('Произошла ошибка при отправке данных.');
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Готово!';
-                }
-            }, 100);
+            // Отправляем данные и сразу закрываем
+            tg.sendData(JSON.stringify(data));
+            tg.close();
         });
-
-        // --- Инициализация ---
-        async function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode');
-
-            if (mode === 'edit') {
-                await fetchUserProfile();
-            }
-            
-            loadingScreen.style.display = 'none';
-            form.style.display = 'block';
-        }
-
-        init();
     });
     </script>
 </body>
