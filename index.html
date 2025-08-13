@@ -7,8 +7,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #222; color: #fff; }
-        input { width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; }
-        button { width: 100%; padding: 15px; font-size: 18px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; }
+        /* HTML-кнопка нам больше не нужна, поэтому ее стили можно убрать */
     </style>
 </head>
 <body>
@@ -17,25 +19,40 @@
         <label for="name">Твое имя:</label>
         <input type="text" id="name" name="name" value="Тестовый пользователь">
     </div>
-    <button id="submit-button">Отправить данные</button>
+    <!-- HTML-кнопка удалена. Вместо нее будет нативная кнопка Telegram -->
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const submitButton = document.getElementById('submit-button');
-        
-        submitButton.addEventListener('click', () => {
+        // --- НОВАЯ ЛОГИКА: ИСПОЛЬЗУЕМ ГЛАВНУЮ КНОПКУ TELEGRAM ---
+
+        // 1. Получаем объект главной кнопки
+        const mainButton = tg.MainButton;
+
+        // 2. Настраиваем ее внешний вид
+        mainButton.setText('Отправить данные и закрыть');
+        mainButton.enable(); // Делаем ее активной
+        mainButton.show();   // Показываем ее пользователю
+
+        // 3. Вешаем обработчик на ее нажатие
+        mainButton.onClick(() => {
+            // Показываем индикатор загрузки на кнопке
+            mainButton.showProgress();
+
             const data = {
                 profile: {
                     name: document.getElementById('name').value
                 },
-                preferences: {} // Пустой объект, как и ожидает Python
+                preferences: {}
             };
 
-            // Отправляем данные и сразу закрываем
+            // Отправляем данные
             tg.sendData(JSON.stringify(data));
+            
+            // Важно: tg.close() вызывается после sendData.
+            // Telegram гарантирует, что данные будут отправлены перед закрытием.
             tg.close();
         });
     });
