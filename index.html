@@ -205,7 +205,7 @@
         async function fetchUserProfile() {
             // ВАЖНО: Этот URL нужно будет заменить на актуальный адрес твоего бэкенда
             // Например, на адрес ngrok во время локальной разработки
-            const backendUrl = `https://ЗАМЕНИ-МЕНЯ.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
+            const backendUrl = `https://ccae1e99f45c.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
 
             try {
                 const response = await fetch(backendUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } });
