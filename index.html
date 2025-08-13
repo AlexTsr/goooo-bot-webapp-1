@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="telegram-webapp" content="true">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Онбординг</title>
+    <title>Анкета тренера</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #5e17eb;
+            --bg-color: #1a1a1a;
+            --form-bg-color: #2c2c2c;
             --text-color: #ffffff;
-            --button-choice-bg: #4b1bbb;
-            --button-choice-text: #ede9f8;
-            --button-accent-bg: #fa7543;
-            --link-color: #ff6f3a;
-            --input-bg-color: rgba(0, 0, 0, 0.2);
+            --label-color: #a0a0a0;
+            --input-bg-color: #3a3a3a;
+            --button-accent-bg: #007bff;
+            --button-choice-bg: #4a4a4a;
+            --button-choice-selected-bg: #007bff;
+            --border-color: #444444;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -27,29 +27,13 @@
             flex-direction: column;
             align-items: center;
         }
-        #welcome-screen, #loading-screen {
-            display: none; /* JS решает, что показать */
+        #loading-screen {
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: calc(100vh - 40px);
             text-align: center;
-        }
-        #welcome-screen h1, #loading-screen h1 {
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
-        .accent-button {
-            background-color: var(--button-accent-bg);
-            color: var(--text-color);
-            border: none;
-            border-radius: 8px;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            max-width: 300px;
         }
         #onboarding-form {
             display: none;
@@ -60,46 +44,33 @@
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 12px;
-            background-color: rgba(0, 0, 0, 0.1);
-            text-align: left;
+            background-color: var(--form-bg-color);
         }
         .form-section h2 {
             margin-top: 0;
             text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 500;
+            color: var(--label-color);
         }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
-            border: 1px solid var(--button-choice-bg);
+            border: 1px solid var(--border-color);
             background-color: var(--input-bg-color);
             color: var(--text-color);
             font-size: 16px;
             box-sizing: border-box;
-            font-family: inherit;
-        }
-        .form-group textarea {
-            resize: none;
-            height: 110px;
-        }
-        .form-group select {
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ede9f8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 15px top 50%;
-            background-size: 10px;
         }
         .checkbox-group {
             display: flex;
@@ -109,72 +80,49 @@
         .checkbox-label {
             display: block;
             background-color: var(--button-choice-bg);
-            color: var(--button-choice-text);
             border-radius: 8px;
             padding: 10px 15px;
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            transition: background-color 0.2s;
         }
-        .checkbox-label input {
-            display: none;
-        }
+        .checkbox-label input { display: none; }
         .checkbox-label:has(input:checked) {
-             background-color: var(--button-accent-bg);
-             color: var(--text-color);
+             background-color: var(--button-choice-selected-bg);
         }
-        .submit-container {
-            margin-top: 30px;
-            text-align: right;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .button-row {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .choice-button {
-            flex-grow: 1;
-            background-color: var(--button-choice-bg);
-            color: var(--button-choice-text);
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .choice-button:hover {
-            opacity: 0.9;
-        }
-        .choice-button.selected {
+        .submit-button {
             background-color: var(--button-accent-bg);
             color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
         }
+        .submit-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
-    <div id="welcome-screen">
-        <h1>Персонализированные тренировки на основе твоих данных</h1>
-        <button id="start-button" class="accent-button">Начать</button>
+    <div id="loading-screen">
+        <h1>Загрузка...</h1>
     </div>
-    
-    <div id="loading-screen" style="display: none;">
-        <h1>Загружаем ваш профиль...</h1>
-    </div>
-
     <form id="onboarding-form">
-        <!-- Разделы формы (HTML без изменений) -->
-        <div class="form-section" data-section-name="about">
-            <h2>О тебе 😎</h2>
+        <!-- Секция 1: О тебе -->
+        <div class="form-section">
+            <h2>О тебе</h2>
             <div class="form-group">
-                <label for="name">Как тебя зовут?</label>
-                <input type="text" id="name" name="name" placeholder="Имя">
+                <label for="name">Имя</label>
+                <input type="text" id="name" name="name" required>
             </div>
             <div class="form-group">
-                <label for="age_range">Твой возраст?</label>
-                <select id="age_range" name="age_range">
+                <label for="age_range">Возраст</label>
+                <select id="age_range" name="age_range" required>
                     <option value="" disabled selected>Выбери диапазон</option>
                     <option value="<18">&lt;18</option>
                     <option value="18-25">18-25</option>
@@ -184,9 +132,9 @@
                     <option value="55+">55+</option>
                 </select>
             </div>
-            <div class="form-group">
+             <div class="form-group">
                 <label for="gender">Пол</label>
-                <select id="gender" name="gender">
+                <select id="gender" name="gender" required>
                     <option value="" disabled selected>Выбери пол</option>
                     <option value="male">Мужской</option>
                     <option value="female">Женский</option>
@@ -194,764 +142,163 @@
             </div>
             <div class="form-group">
                 <label for="height">Рост (см)</label>
-                <input type="number" id="height" name="height" placeholder="180">
+                <input type="number" id="height" name="height" required>
             </div>
             <div class="form-group">
                 <label for="weight">Вес (кг)</label>
-                <input type="text" id="weight" name="weight" placeholder="75.5">
+                <input type="text" id="weight" name="weight" required>
             </div>
              <div class="form-group">
                 <label for="city">Город (для прогноза погоды)</label>
-                <input type="text" id="city" name="city" placeholder="Екатеринбург">
+                <input type="text" id="city" name="city">
             </div>
         </div>
-        
-        <div class="form-section" data-section-name="experience">
-            <h2>Твой беговой опыт 🏃‍♂</h2>
-                <div class="form-group">
-                    <label for="experience">Как давно ты бегаешь?</label>
-                    <select id="experience" name="experience">
-                        <option value="beginner">Новичок (&lt;6 мес)</option>
-                        <option value="amateur" selected>Любитель (6 мес – 2 года)</option>
-                        <option value="experienced">Опытный (&gt;2 лет)</option>
-                    </select>
-                </div>
-            <div class="form-group hidden" id="beginner_offer_group">
-                <p>Отлично! Для начинающих у меня есть специальный вводный план, который поможет плавно войти в тренировочный процесс без лишних нагрузок и риска травм.</p>
-                <p>Предлагаю начать с него. Попробуешь?</p>
-                <div class="button-row">
-                    <button type="button" id="beginner_accept_button" class="choice-button">Да, попробую</button>
-                    <button type="button" id="beginner_decline_button" class="choice-button">Нет, хочу заполнить всю анкету</button>
-                </div>
-            </div>
+
+        <!-- Секция 2: Опыт и цели -->
+        <div class="form-section">
+            <h2>Опыт и цели</h2>
             <div class="form-group">
-                <label for="pace_5k">Твой лучший результат на 5 км?</label>
-                <select id="pace_5k" name="pace_5k">
-                    <option value="over30">&gt;30 мин</option>
-                    <option value="25-30">25-30 мин</option>
-                    <option value="20-25">20-25 мин</option>
-                    <option value="under20">&lt;20 мин</option>
-                    <option value="specific_time">Знаю точное время</option>
+                <label for="experience">Беговой опыт</label>
+                <select id="experience" name="experience" required>
+                    <option value="Новичок (<6 мес)">Новичок (&lt;6 мес)</option>
+                    <option value="Любитель (6 мес – 2 года)">Любитель (6 мес – 2 года)</option>
+                    <option value="Опытный (>2 лет)">Опытный (&gt;2 лет)</option>
                 </select>
             </div>
-            <div class="form-group hidden" id="pace_5k_specific_group">
-                <label for="pace_5k_specific">Введи точное время (ММ:СС)</label>
-                <input type="text" id="pace_5k_specific" name="pace_5k_specific" placeholder="24:35">
-            </div>
-        </div>
-
-        <div class="form-section" data-section-name="injuries">
-            <h2>Твои травмы 🦴</h2>
             <div class="form-group">
-                <label>У тебя были травмы? (можно выбрать несколько вариантов)</label>
-                <div class="checkbox-group" id="injury_checkbox_group">
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="knee"> <span>Колени</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="shin"> <span>Голени</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="foot"> <span>Стопы</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="ankle"> <span>Голеностопы</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="low_back"> <span>Поясница</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="none"> <span>Нет травм</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="injury_areas" value="other"> <span>Другое</span></label>
-                </div>
-            </div>
-            <div class="form-group hidden" id="injury_details_group">
-                <label for="injury_details">Опиши подробнее</label>
-                <textarea id="injury_details" name="injury_details"></textarea>
-            </div>
-        </div>
-
-        <div class="form-section" data-section-name="goals">
-            <h2>Твои цели в беге 🎯</h2>
-            <div class="form-group">
-                <label>Поделись своими целями (можно выбрать несколько)</label>
-                <div class="checkbox-group" id="goals_checkbox_group">
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="half_marathon"> <span>Полумарафон</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="marathon"> <span>Марафон</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="improve_results"> <span>Улучшить результаты</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="weight_loss"> <span>Снизить вес</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="goals" value="feel_good"> <span>Для хорошего самочувствия</span></label>
+                <label>Основные цели (можно несколько)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Полумарафон"> <span>Полумарафон</span></label>
+                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Марафон"> <span>Марафон</span></label>
+                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Улучшить результаты"> <span>Улучшить результаты</span></label>
+                    <label class="checkbox-label"><input type="checkbox" name="goals" value="Снизить вес"> <span>Снизить вес</span></label>
                 </div>
             </div>
             <div class="form-group hidden" id="target_weight_group">
                 <label for="target_weight">Целевой вес (кг)</label>
-                <input type="text" id="target_weight" name="target_weight" placeholder="70">
-            </div>
-             <div class="form-group">
-                <label>Готовишься к определенному забегу?</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label"><input type="radio" name="race_goal_exists" value="yes"> <span>Да</span></label>
-                    <label class="checkbox-label"><input type="radio" name="race_goal_exists" value="no" checked> <span>Нет</span></label>
-                </div>
-            </div>
-            <div id="race_details_group" class="hidden">
-                 <div class="form-group">
-                    <label for="race_date">Дата забега</label>
-                    <input type="date" id="race_date" name="race_date">
-                </div>
-                <div class="form-group">
-                    <label for="race_distance">Дистанция забега</label>
-                    <input type="text" id="race_distance" name="race_distance" placeholder="Полумарафон или 21.1 км">
-                </div>
-                 <div class="form-group">
-                    <label for="race_time_goal">Целевое время (ЧЧ:ММ:СС)</label>
-                    <input type="text" id="race_time_goal" name="race_time_goal" placeholder="01:45:00">
-                </div>
+                <input type="text" id="target_weight" name="target_weight">
             </div>
         </div>
+        
+        <!-- Другие секции можно добавить по аналогии -->
 
-        <div class="form-section" data-section-name="preferences">
-            <h2>Твои предпочтения ⭐</h2>
-            <div class="form-group">
-                <label for="training_days_per_week">Сколько дней в неделю готов тренироваться?</label>
-                <select id="training_days_per_week" name="training_days_per_week">
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4" selected>4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                </select>
-            </div>
-            <div class="form-group hidden" id="rest_day_group">
-                <label for="rest_day">В какой день недели хочешь отдыхать от бега?</label>
-                <select id="rest_day" name="rest_day">
-                    <option value="mon">ПН</option>
-                    <option value="tue">ВТ</option>
-                    <option value="wed">СР</option>
-                    <option value="thu">ЧТ</option>
-                    <option value="fri">ПТ</option>
-                    <option value="sat">СБ</option>
-                    <option value="sun">ВС</option>
-                </select>
-            </div>
-            <div class="form-group hidden" id="long_run_day_group">
-                <label for="long_run_day">В какой день недели предпочитаешь бегать длительную тренировку?</label>
-                <select id="long_run_day" name="long_run_day">
-                    <option value="mon">ПН</option>
-                    <option value="tue">ВТ</option>
-                    <option value="wed">СР</option>
-                    <option value="thu">ЧТ</option>
-                    <option value="fri">ПТ</option>
-                    <option value="sat">СБ</option>
-                    <option value="sun">ВС</option>
-                    <option value="none">не хочу бегать длительные</option>
-                </select>
-            </div>
-             <div class="form-group">
-                <label for="weekly_volume_km">Желаемый недельный объем в километрах?</label>
-                <input type="number" id="weekly_volume_km" name="weekly_volume_km" placeholder="40">
-            </div>
-            <div class="form-group">
-                <label>Предпочтительное время тренировок? (можно несколько)</label>
-                <div class="checkbox-group" id="preferred_time_group">
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_time" value="morning"> <span>Утро (6-9)</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_time" value="afternoon"> <span>День (12-15)</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_time" value="evening"> <span>Вечер (18-21)</span></label>
-                </div>
-            </div>
-            <div class="form-group hidden" id="multiple_sessions_group">
-                <label>Можешь заниматься больше одного раза в день?</label>
-                <p style="font-size: 14px; margin-top: -5px; opacity: 0.8;">Это позволит гибче распределить нагрузку, например, утром легкая пробежка, а вечером основная работа.</p>
-                <div class="checkbox-group">
-                    <label class="checkbox-label"><input type="radio" name="can_train_multiple_times_daily" value="yes"> <span>Да, две тренировки</span></label>
-                    <label class="checkbox-label"><input type="radio" name="can_train_multiple_times_daily" value="no" checked> <span>Нет, только одна в день</span></label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Где предпочитаешь бегать? (можно несколько)</label>
-                 <div class="checkbox-group" id="preferred_terrain_group">
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_terrain" value="stadium"> <span>Стадион</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_terrain" value="park_trail"> <span>Парк или лес (грунт)</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_terrain" value="asphalt"> <span>Асфальт</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="preferred_terrain" value="treadmill"> <span>Беговая дорожка</span></label>
-                </div>
-            </div>
-             <div class="form-group">
-                <label>Какие тренировки нравятся? (можно несколько)</label>
-                 <div class="checkbox-group" id="favorite_workouts_group">
-                    <label class="checkbox-label"><input type="checkbox" name="favorite_workouts" value="intervals"> <span>Интервальные</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="favorite_workouts" value="tempo"> <span>Темповые</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="favorite_workouts" value="long_run"> <span>Длительные</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="favorite_workouts" value="hill_intervals"> <span>Интервалы в горку</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="favorite_workouts" value="fartlek"> <span>Фартлек</span></label>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-section" data-section-name="other">
-            <h2>Прочее 📦</h2>
-            <div class="form-group">
-                <label>Какое у тебя есть оборудование? (можно несколько)</label>
-                <div class="checkbox-group" id="equipment_checkbox_group">
-                    <label class="checkbox-label"><input type="checkbox" name="equipment" value="watch"> <span>Электронные часы</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="equipment" value="heart_rate_monitor"> <span>Нагрудный пульсометр</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="equipment" value="weights"> <span>Гири/гантели</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="equipment" value="mat"> <span>Коврик для йоги</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="equipment" value="roller"> <span>Массажный валик</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="equipment" value="other"> <span>Другое</span></label>
-                </div>
-            </div>
-            <div class="form-group hidden" id="equipment_other_group">
-                <label for="equipment_other">Перечисли доступное оборудование списком.</label>
-                <input type="text" id="equipment_other" name="equipment_other">
-            </div>
-             <div class="form-group">
-                <label for="supplements_info">Принимаешь спортивные добавки, витамины или лекарства?</label>
-                <input type="text" id="supplements_info" name="supplements_info" placeholder="Например: Омега-3, Витамин D">
-            </div>
-             <div class="form-group">
-                <label for="additional_info">Хочешь что-то еще сообщить о себе?</label>
-                <textarea id="additional_info" name="additional_info" placeholder="Например, ПАНО, личные рекорды, особенности здоровья..."></textarea>
-            </div>
-        </div>
-
-        <div class="form-section" data-section-name="nutrition">
-            <h2>О питании 🥗</h2>
-            <div class="form-group">
-                <label>Есть ли у тебя пищевые ограничения? (можно несколько)</label>
-                <div class="checkbox-group" id="food_preferences_group">
-                    <label class="checkbox-label"><input type="checkbox" name="food_preferences" value="vegan"> <span>Веган/вегетарианец</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="food_preferences" value="lactose_intolerance"> <span>Непереносимость лактозы</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="food_preferences" value="gluten_intolerance"> <span>Непереносимость глютена</span></label>
-                    <label class="checkbox-label"><input type="checkbox" name="food_preferences" value="allergy"> <span>Пищевая аллергия</span></label>
-                </div>
-            </div>
-            <div class="form-group hidden" id="food_allergies_group">
-                <label for="food_allergies">Перечисли продукты, на которые у тебя аллергия.</label>
-                <input type="text" id="food_allergies" name="food_allergies">
-            </div>
-            <div class="form-group">
-                <label for="meals_per_day">Сколько приемов пищи в день ты предпочитаешь?</label>
-                <select id="meals_per_day" name="meals_per_day">
-                    <option value="3" selected>3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                </select>
-            </div>
-             <div class="form-group">
-                <label>Пьешь кофе?</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label"><input type="radio" name="drinks_coffee" value="yes"> <span>Да</span></label>
-                    <label class="checkbox-label"><input type="radio" name="drinks_coffee" value="no" checked> <span>Нет</span></label>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-section" data-section-name="start_date">
-            <div class="form-group">
-                <label>Когда готов начать заниматься по плану?</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label"><input type="radio" name="plan_start_date" value="today" checked> <span>Сегодня</span></label>
-                    <label class="checkbox-label"><input type="radio" name="plan_start_date" value="tomorrow"> <span>Завтра</span></label>
-                    <label class="checkbox-label"><input type="radio" name="plan_start_date" value="next_monday"> <span>В понедельник</span></label>
-                </div>
-            </div>
-        </div>
-        
-        <div class="submit-container">
-             <button type="button" id="submit-button" class="accent-button">Готово! Создать мой план</button>
-        </div>
+        <button type="button" id="submit-button" class="submit-button">Готово!</button>
     </form>
 
-    
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const tg = window.Telegram.WebApp;
-    if (tg) { tg.expand(); }
+    document.addEventListener('DOMContentLoaded', () => {
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-    // --- Получаем все нужные элементы ---
-    const welcomeScreen = document.getElementById('welcome-screen');
-    const loadingScreen = document.getElementById('loading-screen');
-    const form = document.getElementById('onboarding-form');
-    const startButton = document.getElementById('start-button');
-    const submitButton = document.getElementById('submit-button');
+        const form = document.getElementById('onboarding-form');
+        const loadingScreen = document.getElementById('loading-screen');
+        const submitButton = document.getElementById('submit-button');
 
-    // --- Элементы для динамической логики ---
-    const experienceSelect = document.getElementById('experience');
-    const beginnerOfferGroup = document.getElementById('beginner_offer_group');
-    const beginnerAcceptButton = document.getElementById('beginner_accept_button');
-    const beginnerDeclineButton = document.getElementById('beginner_decline_button');
-    const injuryCheckboxGroup = document.getElementById('injury_checkbox_group');
-    const injuryDetailsGroup = document.getElementById('injury_details_group');
-    const trainingDaysSelect = document.getElementById('training_days_per_week');
-    const restDayGroup = document.getElementById('rest_day_group');
-    const restDaySelect = document.getElementById('rest_day');
-    const longRunDayGroup = document.getElementById('long_run_day_group');
-    const longRunDaySelect = document.getElementById('long_run_day');
-    const preferredTimeGroup = document.getElementById('preferred_time_group');
-    const multipleSessionsGroup = document.getElementById('multiple_sessions_group');
-    const sectionsToHideForBeginner = [
-        form.querySelector('[data-section-name="injuries"]'),
-        form.querySelector('[data-section-name="goals"]'),
-        form.querySelector('[data-section-name="preferences"]'),
-        form.querySelector('[data-section-name="other"]'),
-        form.querySelector('[data-section-name="nutrition"]')
-    ];
-
-    // --- Логика отображения скрытых полей ---
-    const setupVisibilityToggles = () => {
-        document.getElementById('pace_5k').addEventListener('change', (e) => {
-            document.getElementById('pace_5k_specific_group').classList.toggle('hidden', e.target.value !== 'specific_time');
+        // --- Логика отображения скрытых полей ---
+        const weightLossCheckbox = document.querySelector('input[name="goals"][value="Снизить вес"]');
+        const targetWeightGroup = document.getElementById('target_weight_group');
+        weightLossCheckbox.addEventListener('change', () => {
+            targetWeightGroup.classList.toggle('hidden', !weightLossCheckbox.checked);
         });
-        
-        document.querySelector('input[name="goals"][value="weight_loss"]').addEventListener('change', (e) => {
-             document.getElementById('target_weight_group').classList.toggle('hidden', !e.target.checked);
-        });
-        document.querySelectorAll('input[name="race_goal_exists"]').forEach(radio => radio.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                document.getElementById('race_details_group').classList.toggle('hidden', e.target.value !== 'yes');
+
+        // --- Функция запроса данных с бэкенда ---
+        async function fetchUserProfile() {
+            // ВАЖНО: Этот URL нужно будет заменить на актуальный адрес твоего бэкенда
+            // Например, на адрес ngrok во время локальной разработки
+            const backendUrl = `https://ЗАМЕНИ-МЕНЯ.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
+
+            try {
+                const response = await fetch(backendUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                populateForm(data);
+            } catch (error) {
+                console.error("Ошибка при загрузке профиля:", error);
+                loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте перезапустить анкету.</h1>';
             }
-        }));
-         document.querySelector('input[name="food_preferences"][value="allergy"]').addEventListener('change', (e) => {
-             document.getElementById('food_allergies_group').classList.toggle('hidden', !e.target.checked);
-        });
-        document.querySelector('input[name="equipment"][value="other"]').addEventListener('change', (e) => {
-             document.getElementById('equipment_other_group').classList.toggle('hidden', !e.target.checked);
-        });
-        injuryCheckboxGroup.addEventListener('change', (e) => {
-            const otherCheckbox = injuryCheckboxGroup.querySelector('input[value="other"]');
-            injuryDetailsGroup.classList.toggle('hidden', !otherCheckbox.checked);
-        });
-    };
-
-    // --- Логика взаимоисключающих чекбоксов (травмы) ---
-    const setupInjuryExclusion = () => {
-        injuryCheckboxGroup.addEventListener('change', (e) => {
-            const changedCheckbox = e.target;
-            const noInjuriesCheckbox = injuryCheckboxGroup.querySelector('input[value="none"]');
-            const otherCheckboxes = Array.from(injuryCheckboxGroup.querySelectorAll('input:not([value="none"])'));
-
-            if (changedCheckbox.value === 'none' && changedCheckbox.checked) {
-                otherCheckboxes.forEach(cb => { cb.checked = false; cb.dispatchEvent(new Event('change', { bubbles: true })); });
-            } else if (changedCheckbox.value !== 'none' && changedCheckbox.checked) {
-                if (noInjuriesCheckbox.checked) {
-                    noInjuriesCheckbox.checked = false;
-                    noInjuriesCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            }
-        });
-    };
-    
-    // --- Логика для новичков ---
-    const setupBeginnerLogic = () => {
-        experienceSelect.addEventListener('change', () => {
-            if (experienceSelect.value === 'beginner') {
-                beginnerOfferGroup.classList.remove('hidden');
-            } else {
-                beginnerOfferGroup.classList.add('hidden');
-                sectionsToHideForBeginner.forEach(s => s.classList.remove('hidden'));
-                form.dataset.beginnerPlan = 'false';
-                beginnerAcceptButton.classList.remove('selected');
-                beginnerDeclineButton.classList.remove('selected');
-            }
-        });
-        beginnerAcceptButton.addEventListener('click', () => {
-            sectionsToHideForBeginner.forEach(s => s.classList.add('hidden'));
-            form.dataset.beginnerPlan = 'true'; 
-            beginnerAcceptButton.classList.add('selected');
-            beginnerDeclineButton.classList.remove('selected');
-        });
-        beginnerDeclineButton.addEventListener('click', () => {
-            sectionsToHideForBeginner.forEach(s => s.classList.remove('hidden'));
-            form.dataset.beginnerPlan = 'false';
-            beginnerDeclineButton.classList.add('selected');
-            beginnerAcceptButton.classList.remove('selected');
-        });
-    };
-    
-    // --- Логика для дней тренировок/отдыха ---
-    const updateRestAndLongRunDays = () => {
-        if (trainingDaysSelect.value < 7) {
-            restDayGroup.classList.remove('hidden');
-            longRunDayGroup.classList.remove('hidden');
-            
-            const selectedRestDay = restDaySelect.value;
-            Array.from(longRunDaySelect.options).forEach(option => {
-                option.style.display = (option.value === selectedRestDay) ? 'none' : 'block';
-            });
-
-            if (longRunDaySelect.options[longRunDaySelect.selectedIndex].style.display === 'none') {
-                longRunDaySelect.value = Array.from(longRunDaySelect.options).find(opt => opt.style.display !== 'none').value;
-            }
-        } else {
-            restDayGroup.classList.add('hidden');
-            longRunDayGroup.classList.add('hidden');
         }
-    };
-    
-    const setupTrainingDaysLogic = () => {
-        trainingDaysSelect.addEventListener('change', updateRestAndLongRunDays);
-        restDaySelect.addEventListener('change', updateRestAndLongRunDays);
-    };
 
-    // --- Логика для тренировок 2 раза в день ---
-    const setupMultipleSessionsLogic = () => {
-        preferredTimeGroup.addEventListener('change', () => {
-            const checkedCount = preferredTimeGroup.querySelectorAll('input[type="checkbox"]:checked').length;
-            multipleSessionsGroup.classList.toggle('hidden', checkedCount <= 1);
-        });
-    };
-
-    // --- Запрос профиля с бэкенда ---
-    async function fetchUserProfile() {
-        welcomeScreen.style.display = 'none';
-        form.style.display = 'none';
-        loadingScreen.style.display = 'flex';
-
-        // ВАЖНО: Замени URL на актуальный адрес твоего бэкенда (например, ngrok)
-        const backendUrl = `https://fa71c3e92b63.ngrok-free.app/get_profile/${tg.initDataUnsafe.user.id}`;
-
-        try {
-            const response = await fetch(backendUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
+        // --- Функция заполнения формы ---
+        function populateForm(data) {
+            if (!data || !data.profile) return;
+            const profile = data.profile;
             
-            populateForm(data);
+            document.getElementById('name').value = profile.name || '';
+            document.getElementById('age_range').value = profile.age_range || '';
+            document.getElementById('gender').value = profile.gender || '';
+            document.getElementById('height').value = profile.height || '';
+            document.getElementById('weight').value = profile.weight || '';
+            document.getElementById('city').value = profile.city || '';
+            document.getElementById('experience').value = profile.experience || '';
+            
+            if (profile.goals && Array.isArray(profile.goals.main)) {
+                profile.goals.main.forEach(goal => {
+                    const checkbox = document.querySelector(`input[name="goals"][value="${goal}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+            if (document.querySelector('input[name="goals"][value="Снизить вес"]').checked) {
+                targetWeightGroup.classList.remove('hidden');
+                document.getElementById('target_weight').value = profile.target_weight || '';
+            }
+        }
+
+        // --- Логика кнопки "Готово!" ---
+        submitButton.addEventListener('click', () => {
+            // Проверяем, что все обязательные поля заполнены
+            if (!form.checkValidity()) {
+                tg.showAlert('Пожалуйста, заполни все обязательные поля.');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Отправка...';
+
+            setTimeout(() => {
+                try {
+                    const profileData = {
+                        name: document.getElementById('name').value,
+                        age_range: document.getElementById('age_range').value,
+                        gender: document.getElementById('gender').value,
+                        height: document.getElementById('height').value,
+                        weight: document.getElementById('weight').value,
+                        city: document.getElementById('city').value,
+                        experience: document.getElementById('experience').value,
+                        goals: {
+                            main: Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(cb => cb.value)
+                        },
+                        target_weight: document.getElementById('target_weight').value
+                    };
+                    
+                    // Для простоты пока отправляем только профиль
+                    const finalData = { profile: profileData, preferences: {} };
+
+                    tg.sendData(JSON.stringify(finalData));
+                    tg.close();
+                } catch (error) {
+                    console.error("Ошибка при отправке данных:", error);
+                    tg.showAlert('Произошла ошибка при отправке данных.');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Готово!';
+                }
+            }, 100);
+        });
+
+        // --- Инициализация ---
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+
+            if (mode === 'edit') {
+                await fetchUserProfile();
+            }
             
             loadingScreen.style.display = 'none';
             form.style.display = 'block';
-            updateRestAndLongRunDays();
-        } catch (error) {
-            console.error("Ошибка при загрузке профиля:", error);
-            loadingScreen.innerHTML = '<h1>Ошибка загрузки. Попробуйте перезапустить анкету из бота.</h1>';
-        }
-    }
-
-    // --- Заполнение формы данными из JSON ---
-    function populateForm(data) {
-        if (!data || !data.profile) {
-            console.error("populateForm: Некорректные данные профиля получены от бэкенда.");
-            loadingScreen.innerHTML = '<h1>Не удалось разобрать данные профиля.</h1>';
-            return;
         }
 
-        const profile = data.profile;
-        const prefs = data.preferences || {};
-
-        const setValue = (id, value) => {
-            const el = document.getElementById(id);
-            if (el && value !== null && value !== undefined) el.value = value;
-        };
-        const setSelectByValue = (id, value) => {
-            const select = document.getElementById(id);
-            if (select && value !== null && value !== undefined) select.value = value;
-        };
-        const setSelectByText = (id, text) => {
-            const select = document.getElementById(id);
-            if (!select || text === null || text === undefined) return;
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].textContent.trim() === String(text).trim()) {
-                    select.value = select.options[i].value;
-                    break;
-                }
-            }
-        };
-        const setMultiSelect = (group_id, values) => {
-            if (!Array.isArray(values)) return;
-            const group = document.getElementById(group_id);
-            if (!group) return;
-            group.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                const labelText = checkbox.nextElementSibling?.textContent.trim();
-                checkbox.checked = values.map(v => String(v).trim()).includes(labelText);
-            });
-        };
-        const setRadio = (name, value) => {
-            if (value === null || value === undefined) return;
-            const strValue = (typeof value === 'boolean') ? (value ? 'yes' : 'no') : String(value);
-            const radio = document.querySelector(`input[name="${name}"][value="${strValue}"]`);
-            if (radio) radio.checked = true;
-        };
-
-        // Заполнение...
-        setValue('name', profile.name);
-        setSelectByValue('age_range', profile.age_range);
-        setSelectByValue('gender', profile.gender);
-        setValue('height', profile.height);
-        setValue('weight', profile.weight);
-        setValue('city', profile.city);
-        setSelectByText('experience', profile.experience);
-        const paceOptions = ["over30", "25-30", "20-25", "under20"];
-        if (paceOptions.some(opt => profile.pace_5k && profile.pace_5k.includes(opt))) {
-             setSelectByValue('pace_5k', profile.pace_5k);
-        } else if (profile.pace_5k) {
-            setSelectByValue('pace_5k', 'specific_time');
-            setValue('pace_5k_specific', profile.pace_5k);
-        }
-        if (profile.injuries && profile.injuries.areas) {
-            setMultiSelect('injury_checkbox_group', profile.injuries.areas);
-            if (profile.injuries.details) setValue('injury_details', profile.injuries.details);
-        }
-        if (profile.goals && profile.goals.main) {
-            const goalMap = { "Полумарафон": "half_marathon", "Марафон": "marathon", "Улучшить результаты": "improve_results", "Снизить вес": "weight_loss", "Для хорошего самочувствия": "feel_good" };
-            const goalValues = profile.goals.main.map(g => goalMap[g]).filter(Boolean);
-            document.querySelectorAll('input[name="goals"]').forEach(cb => {
-                if (goalValues.includes(cb.value)) cb.checked = true;
-            });
-            if (profile.target_weight) setValue('target_weight', profile.target_weight);
-        }
-        setRadio('race_goal_exists', profile.race_goal_exists);
-        setValue('race_date', profile.race_date);
-        setValue('race_distance', profile.race_distance);
-        setValue('race_time_goal', profile.race_time_goal);
-        if (prefs) {
-            setSelectByValue('training_days_per_week', prefs.training_days_per_week);
-            const dayMap = { "пн": "mon", "вт": "tue", "ср": "wed", "чт": "thu", "пт": "fri", "сб": "sat", "вс": "sun" };
-            if (prefs.rest_day) setSelectByValue('rest_day', dayMap[prefs.rest_day.toLowerCase()]);
-            if (prefs.long_run_day) setSelectByValue('long_run_day', dayMap[prefs.long_run_day.toLowerCase()]);
-            setValue('weekly_volume_km', prefs.weekly_volume_km);
-            const timeMap = {"Утро (6-9)": "morning", "День (12-15)": "afternoon", "Вечер (18-21)": "evening"};
-            const timeValues = (prefs.preferred_time || []).map(t => timeMap[t]).filter(Boolean);
-            document.querySelectorAll('input[name="preferred_time"]').forEach(cb => {
-                if (timeValues.includes(cb.value)) cb.checked = true;
-            });
-            setRadio('can_train_multiple_times_daily', prefs.can_train_multiple_times_daily);
-            setMultiSelect('preferred_terrain_group', prefs.preferred_terrain);
-            setMultiSelect('favorite_workouts_group', prefs.favorite_workouts);
-        }
-        if (profile.equipment && profile.equipment.items) {
-            setMultiSelect('equipment_checkbox_group', profile.equipment.items);
-            if (profile.equipment.other) setValue('equipment_other', profile.equipment.other);
-        }
-        setValue('supplements_info', profile.supplements_info);
-        setValue('additional_info', profile.additional_info);
-        if (profile.food_preferences && profile.food_preferences.type) {
-             setMultiSelect('food_preferences_group', profile.food_preferences.type);
-             if (profile.food_preferences.allergies) setValue('food_allergies', profile.food_preferences.allergies);
-        }
-        setSelectByValue('meals_per_day', profile.meals_per_day);
-        setRadio('drinks_coffee', profile.drinks_coffee);
-        
-        document.querySelectorAll('input, select').forEach(el => {
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-    }
-
-
-// --- Исправленный обработчик кнопки "Готово" ---
-submitButton.addEventListener('click', async () => {
-    // Немедленно обновляем UI
-    submitButton.disabled = true;
-    submitButton.textContent = 'Отправка...';
-
-    try {
-        // --- Вспомогательные функции с проверками ---
-        const getValue = (id) => {
-            const el = document.getElementById(id);
-            return el ? el.value.trim() : null;
-        };
-        
-        const getMultiSelect = (name) => {
-            const selected = [];
-            document.querySelectorAll(`input[name="${name}"]:checked`).forEach(cb => {
-                if (cb.nextElementSibling) {
-                    selected.push(cb.nextElementSibling.textContent.trim());
-                }
-            });
-            return selected;
-        };
-        
-        const getRadio = (name) => {
-            const el = document.querySelector(`input[name="${name}"]:checked`);
-            return el ? el.value : null;
-        };
-        
-        const getSelectText = (id) => {
-            const select = document.getElementById(id);
-            return select && select.selectedIndex > -1 ? select.options[select.selectedIndex].text : null;
-        };
-
-        // --- Сбор данных асинхронно ---
-        const profile = {};
-        const prefs = {};
-
-        // Основные данные
-        profile.name = getValue('name');
-        profile.age_range = getValue('age_range');
-        profile.gender = getValue('gender');
-        profile.height = getValue('height');
-        profile.weight = getValue('weight');
-        profile.city = getValue('city');
-        profile.experience = getSelectText('experience');
-
-        // Проверяем режим новичка
-        if (form.dataset.beginnerPlan === 'true') {
-            profile.wants_beginner_plan = true;
-        } else {
-            profile.wants_beginner_plan = false;
-            
-            // Собираем дополнительные данные только если не новичок
-            const pace_5k_select = document.getElementById('pace_5k');
-            if (pace_5k_select && pace_5k_select.value === 'specific_time') {
-                profile.pace_5k = getValue('pace_5k_specific');
-            } else {
-                profile.pace_5k = getSelectText('pace_5k');
-            }
-            
-            profile.injuries = {
-                areas: getMultiSelect('injury_areas'),
-                details: getValue('injury_details')
-            };
-            
-            profile.goals = { main: getMultiSelect('goals') };
-            if (profile.goals.main.includes('Снизить вес')) {
-                profile.target_weight = getValue('target_weight');
-            }
-            
-            profile.race_goal_exists = getRadio('race_goal_exists') === 'yes';
-            if (profile.race_goal_exists) {
-                profile.race_date = getValue('race_date');
-                profile.race_distance = getValue('race_distance');
-                profile.race_time_goal = getValue('race_time_goal');
-            }
-            
-            // Предпочтения
-            prefs.training_days_per_week = getValue('training_days_per_week');
-            if (prefs.training_days_per_week && parseInt(prefs.training_days_per_week) < 7) {
-                const restDayText = getSelectText('rest_day');
-                if (restDayText) prefs.rest_day = restDayText.toLowerCase();
-                
-                const longRunDayText = getSelectText('long_run_day');
-                if (longRunDayText) prefs.long_run_day = longRunDayText.toLowerCase();
-            }
-            
-            prefs.weekly_volume_km = getValue('weekly_volume_km');
-            prefs.preferred_time = getMultiSelect('preferred_time');
-            
-            if (prefs.preferred_time.length > 1) {
-                prefs.can_train_multiple_times_daily = getRadio('can_train_multiple_times_daily') === 'yes';
-            } else {
-                prefs.can_train_multiple_times_daily = false;
-            }
-            
-            prefs.preferred_terrain = getMultiSelect('preferred_terrain');
-            prefs.favorite_workouts = getMultiSelect('favorite_workouts');
-            
-            profile.equipment = { 
-                items: getMultiSelect('equipment'), 
-                other: getValue('equipment_other') 
-            };
-            
-            profile.supplements_info = getValue('supplements_info');
-            profile.additional_info = getValue('additional_info');
-            
-            profile.food_preferences = { 
-                type: getMultiSelect('food_preferences'), 
-                allergies: getValue('food_allergies') 
-            };
-            
-            profile.meals_per_day = getValue('meals_per_day');
-            profile.drinks_coffee = getRadio('drinks_coffee') === 'yes';
-        }
-
-        profile.plan_start_date = getRadio('plan_start_date');
-        
-        const finalData = { profile, preferences: prefs };
-
-        // --- Проверка и отправка данных ---
-        if (tg && tg.initData) {
-            // Проверяем размер данных
-            const dataString = JSON.stringify(finalData);
-            console.log("Размер данных:", dataString.length, "символов");
-            
-            // Telegram WebApp имеет ограничение на размер данных (~4096 байт)
-            if (dataString.length > 4000) {
-                console.warn("Данные слишком большие, сжимаем...");
-                
-                // Оставляем только самые важные поля
-                const compressedData = {
-                    profile: {
-                        name: profile.name,
-                        age_range: profile.age_range,
-                        gender: profile.gender,
-                        height: profile.height,
-                        weight: profile.weight,
-                        city: profile.city,
-                        experience: profile.experience,
-                        wants_beginner_plan: profile.wants_beginner_plan,
-                        plan_start_date: profile.plan_start_date
-                    },
-                    preferences: {
-                        training_days_per_week: prefs.training_days_per_week,
-                        weekly_volume_km: prefs.weekly_volume_km
-                    }
-                };
-                
-                // Отправляем сжатые данные
-                const compressedString = JSON.stringify(compressedData);
-                console.log("Отправляем сжатые данные:", compressedString);
-                
-                tg.sendData(compressedString);
-            } else {
-                console.log("Отправляем полные данные:", dataString);
-                tg.sendData(dataString);
-            }
-            
-            // Даем время на отправку данных перед закрытием
-            setTimeout(() => {
-                tg.close();
-            }, 100);
-            
-        } else {
-            console.log("Данные для отправки (режим отладки):", JSON.stringify(finalData, null, 2));
-            submitButton.disabled = false;
-            submitButton.textContent = 'Готово! Создать мой план';
-            alert('Режим отладки. Данные выведены в консоль.');
-        }
-        
-    } catch (error) {
-        console.error("Ошибка при сборе или отправке данных:", error);
-        submitButton.disabled = false;
-        submitButton.textContent = 'Готово! Создать мой план';
-        
-        // Показываем более подробную информацию об ошибке
-        alert(`Произошла ошибка при отправке данных: ${error.message}`);
-        
-        // Попытка отправить минимальные данные
-        if (tg && tg.initData) {
-            try {
-                const minimalData = {
-                    profile: {
-                        name: getValue('name') || 'Пользователь',
-                        error: error.message
-                    }
-                };
-                tg.sendData(JSON.stringify(minimalData));
-                setTimeout(() => tg.close(), 100);
-            } catch (fallbackError) {
-                console.error("Не удалось отправить даже минимальные данные:", fallbackError);
-            }
-        }
-    }
-});
-
-    // --- Начальная инициализация ---
-    const init = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const mode = urlParams.get('mode');
-
-        setupVisibilityToggles();
-        setupInjuryExclusion();
-        setupBeginnerLogic();
-        setupTrainingDaysLogic();
-        setupMultipleSessionsLogic();
-
-        if (mode === 'edit' && tg.initDataUnsafe?.user?.id) {
-            fetchUserProfile();
-        } else {
-            welcomeScreen.style.display = 'flex';
-            if (startButton) {
-                startButton.addEventListener('click', () => {
-                    welcomeScreen.style.display = 'none';
-                    form.style.display = 'block';
-                    updateRestAndLongRunDays();
-                });
-            }
-        }
-    };
-
-    init();
-});
+        init();
+    });
     </script>
 </body>
 </html>
